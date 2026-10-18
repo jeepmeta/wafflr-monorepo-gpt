@@ -1,0 +1,1 @@
+The PWA manifest currently references `pwa-192x192.png` and `pwa-512x512.png`. Export these PNG sizes from `pwa-icon-source.svg` before production deployment, or change the manifest to point to supported SVG icons.
