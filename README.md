@@ -2,12 +2,16 @@
 
 Wafflr is a gamified group decision-making experience. This repository is a pnpm + Turborepo monorepo for the web/PWA first, with a future Expo React Native app.
 
+## Product documentation
+
+Before implementation, review the [Wafflr documentation hub](./docs/README.md). It links the product vision, host and guest journeys, screen catalog, decision engine, brand and character guide, architecture, and decision log. These docs distinguish confirmed decisions from proposals and open questions.
+
 ## Stack
 
 - pnpm workspaces + Turborepo
 - TypeScript
 - React + Vite
-- Tailwind CSS v4 via `@tailwindcss/vite`
+- Tailwind CSS v4 via @tailwindcss/vite
 - Vite PWA plugin
 - Shared packages designed for web and mobile reuse
 - Expo app placeholder for a future iOS/Android client
@@ -39,12 +43,12 @@ pnpm format    # Format files with Prettier
 
 ## Workspace layout
 
-- `apps/web`: React website and installable PWA
-- `apps/mobile`: future Expo / React Native app placeholder
-- `packages/core`: platform-agnostic domain types and decision logic
-- `packages/ui`: shared UI package placeholder
-- `packages/config`: shared configuration placeholder
+- apps/web: React website and installable PWA
+- apps/mobile: future Expo / React Native app placeholder
+- packages/core: platform-agnostic domain types and decision logic
+- packages/ui: shared UI package placeholder
+- packages/config: shared configuration placeholder
 
-Keep domain logic in `packages/core` free of browser and React Native APIs. Keep web-specific code in `apps/web`. When mobile development begins, initialize Expo in `apps/mobile` and share only platform-neutral logic and components that are genuinely cross-platform.
+Keep domain logic in packages/core free of browser and React Native APIs. Keep web-specific code in apps/web. When mobile development begins, initialize Expo in apps/mobile and share only platform-neutral logic and components that are genuinely cross-platform.
 
 Add secrets to local environment files only; never commit credentials.
