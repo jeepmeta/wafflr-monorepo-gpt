@@ -1,47 +1,50 @@
 # Decision Engine
 
 ## Responsibility
-The engine turns candidate options and participant responses into an understandable outcome. It should be platform-neutral and live in the shared core package, not inside React components or browser-only modules. For a given locked deck and vote set, its result should be deterministic.
+The engine turns one shared room, a locked deck, and submitted ballots into a clear outcome. Keep it platform-neutral in the shared core package. UI components should display domain state, not independently decide permissions or winners.
 
 ## Concepts
-- Decision room: shared activity and lifecycle phase.
-- Category: defines option fields and card presentation.
-- Option/card: candidate choice; for restaurants, a place to eat.
-- Deck: active set and order of options for a round.
-- Participant: host or guest; exact identity model remains open.
-- Vote/response: a participant’s answer to an option.
-- Round: one pass of voting; a tie may cause another round.
+- **Room:** the shared state for one decision.
+- **Card:** one candidate choice.
+- **Deck:** the shared collection of cards for the decision.
+- **Participant:** anyone in the room, including its creator.
+- **Creator:** the participant who opened the room, with three extra powers only: veto cards before voting, end voting early, and choose a winner if the tie-breaker round remains tied.
+- **Ballot:** one participant’s final set of Yup/Nah responses.
+- **Round:** the initial vote or the single tie-breaker round.
 
-## Deck creation and curation
-Options can come from participant submissions and potentially category-specific discovery sources. Integrations are not selected. Before voting, the host reviews a responsive grid and can edit or remove options. New submissions and edits remain accepted during review. Starting voting locks the active deck.
+## Shared room and permissions
+All participants operate on the same room and authoritative phase. If the creator enables guest card creation, the creator contributes cards under the same rules as guests. The creator is not a general administrator. Their extra powers are limited to pre-vote card veto, early end of voting, and final selection after a persistent tie.
 
-The authoritative domain/server layer must enforce the phase boundary. Once voting begins, edits and submissions must not silently change the active deck. Any future correction flow should deliberately restart or amend a round instead of mutating it behind voters.
+## Deck creation and review
+- The creator may build all cards themselves or enable guest contributions.
+- The room-wide maximum is 100 cards across creator and guests. At 100/100, disable further submissions and show “Room full — 100/100 cards.”
+- Guests can edit or delete their own cards until voting starts. The creator can edit/remove cards during final review and veto cards before voting.
+- New submissions and edits remain live during review until voting starts.
+- At least two cards are required to start voting. If fewer than two remain, keep Start Voting disabled until another card is added.
+- Starting voting atomically locks the deck and closes submissions.
 
-## Confirmed interaction rules
-- Swipe right = yes / keep this option.
-- Swipe left = no / reject this option.
-- Guests can press “I’m Done” with unused submission slots; unused slots are skipped.
-- Host review uses a responsive grid with edit and remove controls.
-- Editing reuses the existing card editor/form with Save or Cancel.
-- New submissions and edits are accepted in real time until voting starts.
-- Starting voting locks the deck.
-- Ties may trigger another round.
+## Confirmed voting and winner rules
+- Swipe right or tap **Yup** to approve; swipe left or tap **Nah** to reject.
+- Participants must choose Yup or Nah for every card before submitting; no card-level skipping.
+- Participants can revisit cards and change responses until they press **Submit Votes**. A submitted ballot is final.
+- The highest count of submitted Yup votes wins. Nah votes do not subtract from Yup votes. Only submitted ballots count.
+- The creator may end voting at any time, including before submitting their own ballot.
+- If voting ends with zero submitted ballots, the creator chooses a winner from the available cards.
+- If multiple cards tie for the most Yup votes, run one tie-breaker round with only those tied cards. If they remain tied, the creator selects the final winner from the tied cards.
+- If the creator disconnects during voting or a tie-breaker, the room continues. After 10 minutes disconnected, automatically resolve using submitted ballots; if none have been submitted, randomly choose a winner from the relevant available cards. Reconnection before timeout restores creator control immediately.
 
-## Winner algorithm is still open
-The meaning of each swipe is known, but the precise winner algorithm is not. Do not assume “most right swipes wins” is final until explicitly decided. Approval tally, elimination, pairwise preference, and other methods can produce different results. The chosen rule must be easy to explain and must match the result screen.
+## Outcome and privacy
+The Winner screen displays only the winning card, Butters celebrating, and confetti. Do not display vote totals or losing-card details. The room closes after the short celebration; its Winner screen remains accessible for 24 hours after closure, then room and decision data are deleted.
 
-Decide before implementing final tally: whether everyone votes on every option; whether skipping is allowed; whether one response per participant/option is enforced; whether a vote can change; whether votes are private; how incomplete ballots affect eligibility; what happens if every option is rejected or none gets a yes; whether option order is shuffled; and what counts as a completed ballot.
-
-## Tie policy
-A tie may trigger another round. Define the tie condition, whether only tied options return, whether everyone votes again, maximum additional rounds, and what happens if a tie persists. Until decided, represent a tie honestly rather than selecting a winner arbitrarily.
-
-## Suggested domain operations
-These are design concepts, not finalized function names: validate an option for a category; add/update/remove an option while editable; freeze a deck snapshot; validate and record a response; determine ballot completion; tally a round under the selected policy; detect ties; return an explainable result object.
-
-Keep domain rules separate from persistence, real-time transport, identity, and UI. Use stable option and participant identifiers, not array position.
+## Domain operations
+Implement platform-neutral operations for adding/updating/removing cards while the deck is editable, freezing the deck at voting start, validating ballots, tallying submitted Yup responses, detecting ties, managing the one tie-breaker round, applying creator actions, and resolving creator-disconnect timeout. Keep persistence and real-time transport separate from domain rules.
 
 ## Concurrency and integrity
-Starting voting should atomically freeze the active deck and change the room phase. A late submission or edit must be rejected or handled only by a future explicitly defined flow. Account for duplicate submissions, repeated taps, reconnects, duplicate vote delivery, simultaneous host actions, and clients that have stale room state.
+- Enforce permissions and phase boundaries in the authoritative state layer, not just by hiding UI controls.
+- Starting voting must atomically freeze the deck and close submissions.
+- Reject stale post-lock edits/submissions.
+- Keep all clients aligned to the same phase and deck after reconnect or refresh.
+- Ensure repeat taps, duplicate deliveries, simultaneous phase changes, and reconnects cannot create inconsistent ballots or multiple winners.
 
 ## Test cases
-Prepare tests for empty and one-option decks, duplicate options, pre-lock edits/removals, rejected post-lock changes, unused submission slots, repeated “I’m Done”, incomplete ballots, duplicate votes, reconnects, ties, all-negative ballots, and concurrent phase changes. Exact expected outcomes depend on unresolved policy choices.
+Cover minimum deck size, the 100-card cap, live review edits/submissions, card veto, deck lock, complete/changeable-until-submitted ballots, Yup tally, early end with submitted ballots, zero-ballot creator selection, one tie-breaker, persistent-tie creator selection, creator disconnect/reconnect, 10-minute automatic resolution, and consistent winner state across clients.
