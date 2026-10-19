@@ -9,7 +9,7 @@ Groups often get stuck because people have different preferences, hesitate to su
 The promise: create one room, optionally invite people to contribute choices, vote together, and get to a result—with a little personality and as little friction as possible.
 
 ## Principles
-- Low friction: joining through a shared link or QR code should be simple.
+- Low friction: guests join by entering a room code or scanning a QR code.
 - One shared game: everyone sees the same room, cards, phase, and outcome.
 - Equal participation: the creator can build the full deck or invite guests to contribute; when guests contribute, the creator participates as a card contributor too.
 - Minimal creator powers: the creator can veto cards before voting, end voting early if the game gets stuck, and choose the winner only if a tie remains after the tie-breaker round.
@@ -25,12 +25,12 @@ The promise: create one room, optionally invite people to contribute choices, vo
 Everyone participates in one shared room and sees the same authoritative game state. The creator chooses one of two setup paths:
 
 - **Create all cards:** the creator prepares the deck and opens voting.
-- **Invite guests to create cards:** the creator contributes cards under the same submission rules as guests.
+- **Invite guests to create cards:** the creator contributes cards under the same submission rules as guests. The creator can veto cards from the shared deck before voting, but does not get general editing or room-administration powers over other participants' contributions.
 
 The creator has only three additional powers: veto cards during final review before voting starts, end voting early if the group is stuck or someone is taking too long, and select a winner if a tie remains after the tie-breaker round. These powers do not make the creator a general room administrator. All participants vote under the same rules. See `user-journeys.md`, `decision-engine.md`, and `ux-decision-catalog.md` for the detailed confirmed rules.
 
 ## Initial use case and future categories
-The initial category is restaurants / where to eat. A group may use location-based options or have each participant submit one or more places they would consider. Participants join through a shared link or QR code.
+The initial category is restaurants / where to eat. A group may use location-based options or have each participant submit one or more places they would consider. Guests join by entering a room code or scanning a QR code.
 
 “What should we watch?” is an example of a possible later category. A category can define its own option fields and card template while reusing the room, deck, and voting model.
 
