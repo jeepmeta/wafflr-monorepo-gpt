@@ -39,11 +39,11 @@ Decisions 19–32 are detailed in the [UX decision catalog](./ux-decision-catalo
 - Home and empty-room states use distinct treatments; expired rooms explain what happened and offer a route Home.
 - Room-creation failure preserves local card drafts and provides Retry.
 - Resuming a room restores the exact phase, controls, and progress, with nonblocking catch-up.
-- Guests receive editable random nicknames; duplicate names receive suffixes, and a persistent anonymous device token supports continuity on that device.
+- No nicknames or participant list are shown. Only the guest count is visible, and no participant—including the creator—can identify individual guests.
 - Room Setup lets the creator choose whether to create all cards or allow guest contributions; if guest contribution is enabled, the creator participates as a contributor.
 - Guest quota is one, two, or three cards per guest, chosen during setup. Unused slots are skipped when a guest presses “I’m Done.”
 - The 100-card room-wide cap applies to all contributors. At capacity, disable submissions and show “Room full — 100/100 cards.”
-- Guests can edit/delete their own cards until voting starts; the creator reviews the shared deck in a responsive grid and can edit/remove cards, veto cards, and use Save/Cancel.
+- Guests can edit/delete their own cards until voting starts; the creator reviews the shared deck in a responsive grid and can veto/remove cards. Contributors can edit their own cards; the creator does not edit other contributors' cards.
 - New submissions and edits remain live during review. Starting voting locks the deck at the authoritative state layer and closes submissions.
 - Voting requires at least two cards. The creator can start at any time once the minimum is met, even if guests have unused slots or have not pressed “I’m Done.”
 - Creator powers are limited to pre-vote veto, ending voting early, and final winner selection if the tie-breaker remains tied.
@@ -60,10 +60,9 @@ The current source context did not contain the exact selections for Decisions 1�
 
 ### Room and participant model
 
-- What is the disconnect grace-period duration?
-- What are the privacy, reset, and cross-device rules for anonymous device tokens?
-- Do not add general creator administration, participant removal, or extra room-management controls unless the product direction explicitly changes.
-- Joining links are not used; guests enter a room code or scan its QR code. Room and decision data are deleted 24 hours after closure.
+- Anonymous account IDs are created in the background on first use; each device has independent counters, with no signup, email, recovery, or cross-device linking.
+- Do not add general creator administration, participant removal, joining links, or extra room-management controls. Guests enter a room code or scan its QR code.
+- Rooms expire 24 hours after closure, when room, card, and individual decision data are permanently deleted.
 
 ### Creation and option data
 
