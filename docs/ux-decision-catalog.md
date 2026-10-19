@@ -76,9 +76,53 @@ Tap a card to edit it. Confirm before deleting a card. Images are optional. At t
 - Continue accepting new submissions and edits in real time during review.
 - Lock the deck when voting starts. The lock must be enforced by the authoritative state layer, not only by hiding UI controls.
 
+## Decisions 33–79 — Shared-room and voting rules
+
+The following decisions were confirmed after Decision 32. They supersede earlier conflicting descriptions in this catalog and related documents.
+
+### Product principle and creator role
+
+- One room is one shared game for one decision. Everyone sees the same cards and current phase.
+- The creator may create all cards or invite guests to contribute. When guest contributions are enabled, the creator participates as a card contributor under the same contribution rules as guests.
+- The creator has exactly three additional powers: veto cards before voting starts, end voting early if the game is stuck or someone is taking too long, and choose the winner if the tie-breaker round remains tied. Do not expand this into general host administration.
+
+### Card contribution and review
+
+- The creator selects a per-guest contribution quota of one, two, or three cards.
+- The room-wide maximum is 100 cards across everyone. At 100/100, disable new submissions and show “Room full — 100/100 cards.” The creator can still review, edit, remove/veto cards, and start voting if at least two remain.
+- Guests can edit/delete their own cards until voting starts. The creator can edit/remove cards during final review.
+- Guests can press “I’m Done” with unused slots; unused slots are skipped. This does not prevent the creator from starting voting.
+- New submissions and edits are accepted live during review. The creator can start voting at any time once at least two cards exist, even if guests have not finished contributing. Starting voting locks the deck and closes submissions.
+- If fewer than two cards remain, voting stays disabled until another card is added.
+
+### Shared voting and outcome
+
+- Voting starts with a brief synchronized countdown.
+- Swipe right or tap “Yup” approves; swipe left or tap “Nah” rejects. Every card requires a Yup/Nah response before a ballot can be submitted. Responses can be changed until “Submit Votes”; then the ballot is final.
+- Highest submitted Yup count wins; Nah votes do not subtract. Only submitted ballots count.
+- The creator can end voting at any time, including before submitting their own ballot. If no ballots have been submitted, the creator selects a winner from the available cards.
+- A tie triggers one tie-breaker round with only tied cards. If the tie persists, the creator selects a winner from the tied cards displayed side by side.
+- After submitting, show Butters dancing and “Votes submitted! Waiting for everyone else…” without participant identities or activity.
+- Winner screen shows only the winning card, Butters celebrating, and confetti. Do not show vote totals or losing-card details. After a short celebration, close the room; keep the Winner screen available for 24 hours after closure, then permanently delete room and decision data.
+
+### Late joins and creator disconnect
+
+- Guests who join after voting starts are view-only and see the current game state, or the Winner screen if the game has finished.
+- If the creator disconnects, the room continues and the original creator role remains. Guests can continue voting/submitting; creator-only phase controls become available when the creator returns. Guests see no disconnect notice or countdown.
+- Reconnection within 10 minutes restores creator control immediately.
+- If the creator stays disconnected for 10 minutes during voting or a tie-breaker, automatically resolve using submitted ballots. If no ballots have been submitted, randomly select a winner from the relevant available cards.
+
+### Room privacy and lifecycle
+
+- No nicknames or participant list. Show guest count only; no one, including the creator, can identify individual participants.
+- Guests join by entering a room code or scanning a QR code from Home; no joining links.
+- Each room represents one decision only.
+- The room closes automatically after the winner celebration and expires 24 hours after closure. Then room, cards, and individual decision data are permanently deleted.
+- An anonymous account ID is created in the background on first use, with no signup or email. Each device has its own ID and independent counters; no recovery or linking across devices. The participation counter increments on successful room join, even if the user leaves before voting.
+
 ## Cross-document consequences
 
-These decisions affect the user journeys, screen catalog, decision engine, and architecture documents. Keep those documents aligned when behavior changes. In particular, distinguish the host's twenty-five-card authoring grid from the guest's one-to-three-card quota, and distinguish the pre-vote editable phase from the immutable voting deck.
+Keep product vision, journeys, screen catalog, decision engine, and architecture aligned with this shared-room principle. Older entries above that describe host-only card creation, a three-card minimum, twenty-five total host cards as the room cap, participant nicknames, joining links, or a general host-admin role are superseded by the decisions in this section. The creator's three additional powers are exhaustive; avoid adding management mechanics or asking the user to decide routine edge cases.
 
 ## Future decision entry template
 
