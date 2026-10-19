@@ -23,6 +23,9 @@ Record new decisions here and update affected docs in the same change. Treat a d
 - A room is a persisted workflow for one decision, not a live social space or multiplayer game. It is created only when the creator confirms creation, then receives a room code and QR code.
 - The creator chooses exactly one card-creation mode: create all cards, or enable independent guest contributions. When guest contribution is enabled, the creator contributes under the same rules as guests.
 - There is no chat, participant activity feed, visible identity list, presence, or requirement for real-time client synchronization. Guests do not see each other's work. Cards and ballots are shared through explicit submissions and persisted room data.
+- During collection, late guests may join and submit cards until the creator advances the workflow. Each contributor sees their own submission progress and a character waiting screen after finishing; no one sees who else has finished or joined.
+- The creator may advance to review without waiting for every invitee to join or finish. Only saved/submitted cards enter the deck; unsubmitted drafts are excluded. Advancing closes card collection.
+- There is no leave-room or delete-room control. Rooms close through the normal flow and decision data is deleted 24 hours after closure.
 - The creator has only three additional powers: veto cards before voting, end voting early if the game is stuck or delayed, and select a winner if the tie-breaker round remains tied.
 - Guests join by entering the room code or scanning the QR code from Home; no joining links.
 - Room-wide limit: 100 cards across all contributors. New submissions stop at 100/100.
@@ -46,6 +49,8 @@ Decisions 19–32 are detailed in the [UX decision catalog](./ux-decision-catalo
 - The 100-card room-wide cap applies to all contributors. At capacity, disable submissions and show “Room full — 100/100 cards.”
 - Guests can edit/delete their own cards until voting starts; the creator reviews the shared deck in a responsive grid and can veto/remove cards. Contributors can edit their own cards; the creator does not edit other contributors' cards.
 - Card submissions and edits are saved explicitly. The creator fetches the submitted deck for review; live broadcasts are not required. Starting voting locks the deck at the authoritative state layer and closes submissions.
+- The creator may advance to review even if invitees have not joined or some contributors have not submitted. Only submitted cards count; unfinished local drafts are not included.
+- Participants do not leave rooms manually, and no immediate room deletion is available. Room data follows the normal 24-hour post-closure retention policy.
 - Voting requires at least two cards. The creator can start at any time once the minimum is met, even if guests have unused slots or have not pressed “I’m Done.”
 - Creator powers are limited to pre-vote veto, ending voting early, and final winner selection if the tie-breaker remains tied.
 - If the creator disconnects for 10 minutes during voting or a tie-breaker, automatically resolve using submitted ballots; if none exist, randomly select from the relevant cards.
@@ -62,7 +67,7 @@ The current source context did not contain the exact selections for Decisions 1�
 ### Room and participant model
 
 - Anonymous account IDs are created in the background on first use; each device has independent counters, with no signup, email, recovery, or cross-device linking.
-- Do not add general creator administration, participant removal, joining links, or extra room-management controls. Guests enter a room code or scan its QR code.
+- Do not add general creator administration, participant removal, joining links, leave-room controls, immediate room deletion, or extra room-management controls. Guests enter a room code or scan its QR code.
 - Rooms expire 24 hours after closure, when room, card, and individual decision data are permanently deleted.
 
 ### Creation and option data
@@ -78,7 +83,7 @@ The current source context did not contain the exact selections for Decisions 1�
 - Which backend and database will persist rooms, cards, and ballots?
 - What room-code entropy and access controls are appropriate?
 - How should retried submissions be made idempotent?
-- What happens if two creator requests attempt to start voting at nearly the same time?
+- What happens if two creator requests attempt to advance the room at nearly the same time?
 - Can a room be reopened or a round restarted?
 
 ### Design and platform
