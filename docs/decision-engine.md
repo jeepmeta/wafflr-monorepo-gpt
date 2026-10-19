@@ -24,6 +24,10 @@ The creator is not a general administrator. Their extra powers are limited to pr
 - The room-wide maximum is 100 cards across creator and guests. At 100/100, disable further submissions and show “Room full — 100/100 cards.”
 - Contributors can edit or delete their own cards until voting starts. The creator can veto/remove cards from the shared deck during final review, but does not edit other contributors' cards.
 - Submissions and edits are persisted when contributors explicitly save them. The creator refreshes or fetches the deck to review the latest submitted version; no live update stream is required.
+- Collection remains open to late joiners until the creator advances the room. Each contributor's submitted/done state and waiting animation are local to their own client; other participants cannot see who has joined, submitted, or is still working.
+- The creator can advance to review even if invited guests have not joined or some joined guests have not submitted. Unsubmitted drafts are excluded from the deck; only successfully submitted cards are eligible for review.
+- Once the creator advances out of collection, new card contributions are closed. Anyone who joins after voting begins is view-only under the existing late-join rule.
+- There is no leave-room or delete-room action. Rooms close through the normal decision flow and their data is deleted after the 24-hour post-closure retention period.
 - At least two cards are required to start voting. If fewer than two remain, keep Start Voting disabled until another card is added.
 - Starting voting atomically locks the deck and closes submissions.
 
