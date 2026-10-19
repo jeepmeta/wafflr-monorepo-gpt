@@ -46,9 +46,9 @@ The room-wide maximum is 100 cards across everyone. At 100/100, disable further 
 
 **Purpose:** let the host inspect the exact candidate set and ordering before voting.
 
-**Confirmed transition:** Build Deck opens a final review containing all cards, with Edit Deck and Confirm & Build actions. The host can drag cards to reorder before voting.
+**Confirmed transition:** the creator reviews the shared deck before voting in a responsive card grid.
 
-**Confirmed review layout:** responsive card grid with edit and remove controls. Reuse the existing card editor/form when editing; show Save and Cancel.
+**Permissions:** contributors can edit or remove their own cards during review. The creator can edit their own contributions and veto/remove any card from the shared deck, but cannot edit another contributor's card. Keep review actions simple; do not add broader room-management controls.
 
 **Live behavior:** accept new submissions and edits in real time during review. The deck is not final until voting starts. Handle remote changes without silently overwriting unsaved edits.
 
