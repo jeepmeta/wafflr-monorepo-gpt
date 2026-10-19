@@ -27,7 +27,7 @@ export type RoomAction =
   | { type: "begin-tie-breaker"; participantId: string }
   | { type: "creator-select-winner"; participantId: string; cardId: string }
   | { type: "creator-disconnect-timeout"; now: number };
-export type RoomErrorCode = "room-closed" | "wrong-phase" | "not-authorized" | "card-limit-reached" | "duplicate-card-id" | "card-not-found" | "card-not-owned" | "minimum-two-cards" | "ballot-incomplete" | "ballot-already-submitted" | "invalid-ballot-card" | "tie-breaker-not-needed" | "winner-not-eligible";
+export type RoomErrorCode = "room-closed" | "wrong-phase" | "not-authorized" | "card-limit-reached" | "duplicate-card-id" | "card-not-found" | "card-not-owned" | "minimum-two-cards" | "contribution-limit-reached" | "ballot-incomplete" | "ballot-already-submitted" | "invalid-ballot-card" | "tie-breaker-not-needed" | "winner-not-eligible";
 export type RoomActionResult = { ok: true; room: DecisionRoom } | { ok: false; error: RoomErrorCode; room: DecisionRoom };
 const success = (room: DecisionRoom): RoomActionResult => ({ ok: true, room });
 const failure = (room: DecisionRoom, error: RoomErrorCode): RoomActionResult => ({ ok: false, error, room });
@@ -60,6 +60,8 @@ export function applyRoomAction(room: DecisionRoom, action: RoomAction): RoomAct
     case "add-card": {
       if (!canAddCard(room)) return failure(room, room.cards.length >= ROOM_CARD_LIMIT ? "card-limit-reached" : "wrong-phase");
       if (room.cards.some((card) => card.id === action.card.id)) return failure(room, "duplicate-card-id");
+      if (room.contributionMode === "creator-only" && action.card.submittedBy !== room.creatorId) return failure(room, "not-authorized");
+      if (room.contributionMode === "guests-contribute" && room.cards.filter((card) => card.submittedBy === action.card.submittedBy).length >= room.cardLimitPerGuest) return failure(room, "contribution-limit-reached");
       return success({ ...room, cards: [...room.cards, action.card], phase: "reviewing" });
     }
     case "update-own-card": {
