@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, ChevronRight, CircleHelp, Copy, Plus, Sparkles, Trash2, Utensils, Clapperboard, Footprints, WandSparkles, Users, X } from "lucide-react";
-import { applyRoomAction, canStartVoting, createRoom, getRoundResult, type DecisionCategory, type DecisionRoom, type VoteValue } from "@wafflr/core";
+import { applyRoomAction, canStartVoting, createRoom, resolveCurrentRound, type DecisionCategory, type DecisionRoom, type VoteValue } from "@wafflr/core";
 import { Badge, Butters, Button, Card, EmptyState, SectionHeading, TextField } from "@wafflr/ui";
 
-type Screen = "home" | "setup" | "room" | "vote" | "tie" | "winner";
+type Screen = "home" | "join" | "setup" | "room" | "vote" | "tie" | "choose-winner" | "winner";
 type DraftCard = { title: string; category: string; location: string };
 const categories: { id: DecisionCategory; title: string; subtitle: string; icon: typeof Utensils }[] = [
   { id: "eat", title: "What to eat", subtitle: "Restaurants, snacks, the works", icon: Utensils },
@@ -76,17 +76,13 @@ export default function App() {
     if (activeCards.some((card) => !responses[card.id])) { setError("Choose Yup or Nah on every card before submitting."); return; }
     const result = applyRoomAction(room, { type: "submit-ballot", participantId: creatorId, responses, submittedAt: Date.now() });
     if (!result.ok) { setError("Couldn’t submit these votes. Please try again."); return; }
-    const next = result.room;
-    setRoom(next);
-    const outcome = getRoundResult(next);
-    if (outcome.winnerId) {
-      const winner = applyRoomAction(next, { type: "creator-select-winner", participantId: creatorId, cardId: outcome.winnerId });
-      if (winner.ok) setRoom(winner.room);
+    const resolved = resolveCurrentRound(result.room);
+    setRoom(resolved);
+    if (resolved.phase === "winner") {
       setScreen("winner");
-    } else {
-      const tie = applyRoomAction(next, { type: "begin-tie-breaker", participantId: creatorId });
-      if (tie.ok) setRoom(tie.room);
-      setResponses({}); setVoteIndex(0); setScreen("tie");
+    } else if (resolved.phase === "tie-breaker") {
+      if (result.room.phase === "tie-breaker") setScreen("choose-winner");
+      else { setResponses({}); setVoteIndex(0); setScreen("tie"); }
     }
     setError("");
   }
@@ -166,8 +162,10 @@ export default function App() {
         <div className="voting-top"><Badge tone="warning">{screen === "tie" ? "TIE-BREAKER" : "YOUR TURN"}</Badge><span>{Math.min(voteIndex + 1, activeCards.length)} of {activeCards.length}</span></div>
         <div className="vote-intro"><Butters mood="thinking" size="md" /><h1>{screen === "tie" ? "One more little round." : "Could you go for this?"}</h1><p>{screen === "tie" ? "Only the tied options. Let’s break it." : "A Yup says yes. A Nah says no. Trust your gut."}</p></div>
         {activeCards[voteIndex] ? <Card className="vote-card"><div className="vote-card-emoji">{category === "eat" ? ["🍕","🍜","🌮","🍔","🥗"][room.cards.findIndex((card) => card.id === activeCards[voteIndex].id) % 5] : category === "watch" ? "🎬" : category === "do" ? "🎯" : "💡"}</div><span className="eyebrow">OPTION {voteIndex + 1}</span><h2>{activeCards[voteIndex].title}</h2>{activeCards[voteIndex].category && <p>{activeCards[voteIndex].category}</p>}{activeCards[voteIndex].location && <p>{activeCards[voteIndex].location}</p>}<div className="vote-actions"><Button size="lg" variant="danger" onClick={() => setVote(activeCards[voteIndex].id, "nah")}>✕ Nah</Button><Button size="lg" onClick={() => setVote(activeCards[voteIndex].id, "yup")}>♥ Yup</Button></div></Card> : <EmptyState title="All caught up" description="Your choices are ready to submit." />}
-        <div className="voting-bottom">{error && <p className="inline-error">{error}</p>}<Button fullWidth size="lg" disabled={activeCards.some((card) => !responses[card.id])} onClick={submitVotes}>Submit votes <ArrowRight size={17} /></Button><button className="text-action" onClick={() => { if (room) { const ended = applyRoomAction(room, { type: "creator-end-voting", participantId: creatorId }); if (ended.ok) { setRoom(ended.room); if (ended.room.phase === "tie-breaker") setScreen("tie"); else if (ended.room.phase === "winner") setScreen("winner"); else setScreen("room"); } } }}>End voting early</button></div>
+        <div className="voting-bottom">{error && <p className="inline-error">{error}</p>}<Button fullWidth size="lg" disabled={activeCards.some((card) => !responses[card.id])} onClick={submitVotes}>Submit votes <ArrowRight size={17} /></Button><button className="text-action" onClick={() => { if (room) { const ended = applyRoomAction(room, { type: "creator-end-voting", participantId: creatorId }); if (ended.ok) { setRoom(ended.room); if (ended.room.phase === "tie-breaker") setScreen("choose-winner"); else if (ended.room.phase === "winner") setScreen("winner"); else setScreen("choose-winner"); } } }}>End voting early</button></div>
       </section>}
+
+      {screen === "choose-winner" && room && <section className="workflow-screen"><div className="vote-intro"><Butters mood="thinking" size="md" /><h1>{room.phase === "tie-breaker" ? "Still tied!" : "Let’s pick one."}</h1><p>{room.phase === "tie-breaker" ? "One last call. Tap the option that wins for your group." : "Voting ended before anyone submitted. Choose a card to keep things moving."}</p></div><div className="winner-choice-grid">{activeCards.map((card, index) => <button key={card.id} className="winner-choice" onClick={() => chooseWinner(card.id)}><span>{category === "eat" ? ["🍕","🍜","🌮","🍔","🥗"][index % 5] : category === "watch" ? "🎬" : category === "do" ? "🎯" : "💡"}</span><strong>{card.title}</strong><small>Choose winner <ArrowRight size={14} /></small></button>)}</div></section>}
 
       {screen === "winner" && room && <section className="winner-screen"><div className="confetti" aria-hidden="true">✦　✧　✦　✧　✦</div><Butters mood="celebrating" size="lg" /><Badge tone="success">THE GROUP HAS SPOKEN</Badge><h1>It’s a <span>winner!</span></h1><p className="winner-subtitle">No more waffling. Go make it happen.</p><Card className="winner-card"><div className="winner-emoji">{category === "eat" ? "🍕" : category === "watch" ? "🎬" : category === "do" ? "🎉" : "💡"}</div><h2>{room.cards.find((card) => card.id === room.winnerCardId)?.title ?? "Your group’s pick"}</h2><p>{room.cards.find((card) => card.id === room.winnerCardId)?.location}</p><span className="winner-ribbon">WINNER ✨</span></Card><Button size="lg" onClick={() => setScreen("home")}>Back to home</Button><p className="field-note">This is a local prototype; shared real-time rooms are the next integration step.</p></section>}
 
