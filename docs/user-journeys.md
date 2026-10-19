@@ -1,49 +1,45 @@
 # User Journeys and Room Lifecycle
 
+## Core rule: one shared game
+A room is one shared decision, not separate host and guest experiences. Everyone sees the same cards and current phase. The creator is a participant first; creator powers are deliberately limited to three: veto cards before voting, end voting early if the game is stuck or delayed, and select a winner if a tie persists after the tie-breaker round.
+
 ## High-level flow
-Create decision → invite/join → collect options → host reviews deck → vote → results.
+Create room → choose whether to create all cards or invite contributions → collect and review cards → lock deck and vote → resolve any tie → show winner → close room.
 
-The room is shared state, not a set of unrelated local screens. Every participant should see the current phase, including after refresh or rejoining. Persistence and reconnection details remain to be designed.
+The creator chooses one of two setup paths:
+- **Create all cards:** the creator builds the deck and then opens voting.
+- **Invite guests to create cards:** guests contribute under the same card-submission rules as the creator; the creator contributes cards too. The creator can veto cards during final review, but cannot otherwise manage participants.
 
-## Host journey
-**Create:** The host starts a decision and selects the category. Restaurants / where to eat is the initial use case. Exact creation fields are not all finalized.
+## Shared room journey
+**Create and join:** The creator creates a room. Guests join using the room code or QR code from the Home screen. Everyone shares one room state. The room represents one decision only.
 
-**Invite:** The host gets a shareable room link and QR code.
+**Collect cards:** The creator may choose to create the whole deck or allow guest submissions. When guest submissions are enabled, the creator is also a card contributor. Guests may submit within the chosen per-guest limit and can edit or delete their own cards until voting starts. A room-wide cap of 100 cards applies across everyone. At 100/100, new submissions are disabled and the room shows “Room full — 100/100 cards.”
 
-**Collect:** The host monitors the room while guests join and submit candidate options.
+**Finish contributing:** Guests can press “I’m Done” even with unused slots; unused slots are skipped. This does not prevent the creator from moving forward.
 
-**Review:** The host sees a responsive card grid with edit and remove controls. Editing reuses the existing card editor/form and offers Save or Cancel. New submissions and edits are accepted in real time throughout review.
+**Review and veto:** The creator reviews the shared deck in a responsive grid and can edit or remove cards, reusing the card editor with Save or Cancel. New submissions and edits remain live during review. The creator’s veto power applies before voting starts. The creator can start voting at any time once at least two cards exist, even if guests have unused slots or have not pressed “I’m Done.”
 
-**Start voting:** Starting voting locks the deck. The active set must not change underneath voters.
+**Start voting:** Starting voting locks the deck and closes submissions. The room announces the start, shows a brief synchronized countdown, and then all eligible participants enter the voting experience. A late joiner after voting starts is view-only.
 
-**Results:** The host sees the group outcome. A tie may trigger another round; exact tally and tie mechanics remain open.
+**Vote:** Swipe right or tap “Yup” to approve; swipe left or tap “Nah” to reject. Participants must choose Yup or Nah for every card before submitting. They can revisit cards and change choices until pressing “Submit Votes.” After submission, the ballot is final. The waiting message is “Votes submitted! Waiting for everyone else…”
 
-## Guest journey
-**Join:** A guest opens the link or scans the QR code. Whether a name or account is required is undecided.
+**Resolve results:** The card with the highest count of submitted Yup votes wins; Nah votes do not subtract from Yup votes. Only submitted ballots count. The creator may end voting at any time, including before submitting their own ballot. If zero ballots have been submitted, the creator selects a winner from the available cards. If multiple cards tie for the most Yup votes, run one tie-breaker round with only the tied cards. If the tie persists, the creator selects one of the tied cards side by side to declare the winner.
 
-**Contribute:** Guests submit one or more options through a category-aware form.
+**Winner and closure:** Show only the winning card, Butters celebrating, and confetti; do not reveal vote totals or losing-card details. After a short celebration, the room closes automatically. The Winner screen remains available to anyone who opens the room for 24 hours after closure, then room and decision data are permanently deleted.
 
-**Finish:** Guests have an “I’m Done” button. They may finish with unused submission slots; unused slots are skipped, not converted into blank options.
+## Creator disconnect
+The room continues with the original creator role retained. Guests can continue voting and submitting ballots, but only the creator can start or end phases when connected. Guests are not shown a creator-disconnect notice or countdown. If the creator reconnects within 10 minutes, control is restored immediately. After 10 minutes disconnected during voting or a tie-breaker, the phase ends automatically using submitted ballots; if none have been submitted, choose a random winner from the relevant available cards.
 
-**Wait:** A guest waiting screen communicates that the room is waiting for the next phase.
-
-**Vote:** The card-deck interaction uses swipe right = yes/keep and swipe left = no/reject. Accessible non-swipe controls should produce the same response.
-
-**Results:** Guests should understand the outcome. Replay and post-result actions remain open.
-
-## Live review and lock boundary
-During collection and review, new submissions and edits are accepted and reflected in real time. The host can edit or remove options. When voting starts, the deck is locked. The authoritative state layer must enforce this rule; hiding controls in the UI alone is insufficient.
-
-The implementation must decide how concurrent changes are ordered and how clients learn that the phase changed. If a remote update affects a card currently being edited, do not silently overwrite unsaved edits; conflict behavior needs a product/technical decision.
+## Shared-state and integrity rules
+- Every participant sees the same authoritative room phase and deck.
+- The creator is not a general administrator; only the three powers listed above are special creator powers.
+- New submissions and edits are accepted during review and stop when voting starts.
+- Starting voting atomically locks the active deck; stale clients cannot mutate it.
+- Creator actions and participant actions must be reflected in the same shared room state.
+- Re-entry restores the current phase, available controls, and progress rather than restarting the game.
 
 ## Conceptual phases
-These labels are suggested vocabulary, not finalized API contracts:
-- Setup: host configures the decision.
-- Collecting: guests join and submit options.
-- Reviewing: host curates the deck while incoming contributions remain accepted.
-- Voting: the active deck is locked.
-- Results: tally and outcome are displayed.
-- Closed: optional terminal state; existence is undecided.
+Setup → Collecting (if enabled) → Reviewing → Voting → Tie-breaker (only if needed) → Winner → Closed. A room is for one decision; there is no second decision in the same room.
 
 ## Navigation and recovery
-Back, refresh, and rejoin should not create duplicate rooms or bypass the current phase. Include explicit loading, disconnected, stale-room, and error states. Errors should explain whether to retry, edit, or ask the host for help.
+Back, refresh, and rejoin must not create duplicate rooms or bypass the current phase. Show concise loading, disconnected, stale-room, and error states. Prefer preserving work and giving one clear recovery action over adding extra management steps.
