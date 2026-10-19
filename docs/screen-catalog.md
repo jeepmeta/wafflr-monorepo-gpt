@@ -22,23 +22,23 @@ Screen names below describe intended product surfaces, not final route paths. Co
 
 ## Room Setup
 
-**Purpose:** let the host configure a new decision room before creating it.
+**Purpose:** create one shared decision room and choose how cards will be contributed.
 
-**Confirmed layout and controls:** vertical layout; selectable deck/category cards; guest submission quota choices of one, two, or three, defaulting to three. Use the selected category's default title. Validate inline. During submission show “Creating room…”.
+**Confirmed behavior:** the creator selects the category and chooses either to create all cards themselves or invite guests to contribute. When guest contributions are enabled, the creator contributes cards under the same rules as guests. The creator is a participant with only three additional powers: veto cards before voting, end voting early, and select the winner if a tie persists after the tie-breaker round.
+
+If guest contributions are enabled, the creator chooses a quota of one, two, or three cards per guest. The room-wide maximum is 100 cards across everyone. The initial category is restaurants / where to eat. Validate inline and show “Creating room…” during room creation.
 
 **Failure behavior:** show a friendly error, stay on Room Setup, offer Retry, preserve local card drafts, and retry syncing rather than discarding work.
 
 **Open:** exact fields, title-editing rules, location/filter inputs, category roster, and whether setup includes other room preferences.
 
-## Host card builder
+## Card contribution and final review
 
-**Purpose:** let the host prepare the initial options before building the deck.
+**Purpose:** let the creator and, when enabled, guests contribute options to the same shared deck.
 
-**Confirmed layout:** show all twenty-five card slots in a five-by-five grid. Keep the card-entry form fixed at the bottom. Clear the form after a successful add.
+**Confirmed behavior:** the creator may create all cards or invite guests to contribute. Guest contributors can edit/delete their own cards until voting starts. The creator can review the shared deck in a responsive grid, edit/remove cards, and veto cards before voting. Reuse the card editor/form with Save and Cancel.
 
-**Confirmed interactions:** tap a card to edit it; confirm before deleting; images are optional. Disable further additions at twenty-five of twenty-five cards and make the capacity state clear.
-
-**Minimum:** at least three cards are required before Build Deck is enabled.
+The room-wide maximum is 100 cards across everyone. At 100/100, disable further submissions and show “Room full — 100/100 cards.” Voting requires at least two cards; keep Start Voting disabled below two. New submissions and edits are accepted in real time during review, and the creator may start voting without waiting for every guest to finish.
 
 **Open:** precise empty-slot artwork, keyboard/drag accessibility details, validation fields, duplicate handling, and whether the host can save an incomplete draft between sessions.
 
@@ -104,13 +104,11 @@ Screen names below describe intended product surfaces, not final route paths. Co
 
 ## Voting deck
 
-**Purpose:** provide the core card-based voting interaction.
+**Purpose:** provide the core card-based voting interaction for every participant.
 
-**Confirmed gesture meaning:** swipe right = yes/keep; swipe left = no/reject. Provide accessible visible controls that produce the same response so voting does not depend on touch gestures alone.
+**Confirmed interactions:** swipe right or tap Yup to approve; swipe left or tap Nah to reject. Participants must choose Yup or Nah for every card before submitting. They may revisit cards and change responses until Submit Votes; submitted ballots are final. After submitting, show “Votes submitted! Waiting for everyone else…” with Butters dancing and no participant identity/activity details.
 
-**Integrity:** voters use the locked deck for that round. A stale client must not silently submit against a changed deck.
-
-**Open:** whether every voter sees every option, order/randomization, undo/change-vote behavior, ballot completion rules, vote privacy, and the exact tally algorithm.
+**Integrity:** voters use the locked deck for the round. A late joiner after voting starts is view-only. The creator can end voting early at any time; only submitted ballots count.
 
 ## Vote-complete / waiting state
 
@@ -118,15 +116,15 @@ This is a recommended state, not yet a confirmed separate screen. It could tell 
 
 ## Results
 
-**Purpose:** explain the group outcome and make the selected option easy to understand.
+**Purpose:** show the group outcome clearly without exposing private vote details.
 
-**Confirmed direction:** ties may trigger another round. Do not choose an arbitrary winner when the result is tied.
+**Confirmed behavior:** the highest submitted Yup count wins; Nah votes do not subtract. If voting ends with zero submitted ballots, the creator selects a winner from the available cards. A tie triggers one tie-breaker round with only the tied cards; if the tie persists, the creator selects the final winner from the tied cards displayed side by side.
 
-**Open:** tally explanation, individual-vote visibility, winner celebration, post-result actions, and persistent-tie behavior.
+The Winner screen displays only the winning card, Butters celebrating, and confetti. Do not show vote totals or losing-card details. The room closes after a short celebration; the Winner screen remains accessible for 24 hours after closure, then room and decision data are deleted.
 
 ## Tie-break round
 
-A further round may be used to resolve a tie. The exact tie condition, whether only tied options return, whether everyone votes again, maximum rounds, and persistent-tie outcome are open.
+One tie-breaker round contains only the cards tied for the highest Yup count. If the tie persists, the creator selects one of the tied cards displayed side by side. If the creator disconnects during the tie-breaker, the 10-minute timeout applies: resolve using submitted ballots, or randomly select from the tied cards if no tie-breaker ballots were submitted.
 
 ## Shared loading, error, and recovery states
 
