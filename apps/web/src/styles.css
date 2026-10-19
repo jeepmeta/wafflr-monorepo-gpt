@@ -147,3 +147,5 @@ button:disabled { cursor:not-allowed; }
   .winner-choice-grid { grid-template-columns:1fr; }
   .site-footer { padding:1.2rem 1rem; }
 }
+
+.vote-navigation { display:flex; justify-content:space-between; gap:.5rem; margin:.25rem 0 .8rem; }
