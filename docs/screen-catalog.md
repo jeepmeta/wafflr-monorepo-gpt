@@ -38,7 +38,7 @@ If guest contributions are enabled, the creator chooses a quota of one, two, or 
 
 **Confirmed behavior:** the creator may create all cards or invite guests to contribute. Guest contributors can edit/delete their own cards until voting starts. The creator can review the shared deck in a responsive grid, edit/remove cards, and veto cards before voting. Reuse the card editor/form with Save and Cancel.
 
-The room-wide maximum is 100 cards across everyone. At 100/100, disable further submissions and show “Room full — 100/100 cards.” Voting requires at least two cards; keep Start Voting disabled below two. New submissions and edits are accepted in real time during review, and the creator may start voting without waiting for every guest to finish.
+The room-wide maximum is 100 cards across everyone. At 100/100, disable further submissions and show “Room full — 100/100 cards.” Voting requires at least two cards; keep Start Voting disabled below two. Guests may join at any time while collection is open. Each contributor submits independently and then sees their own character waiting screen; no one sees others' progress. The creator may advance to review without waiting for every guest to join or finish. Only submitted cards enter the deck; unsubmitted drafts are excluded. Advancing closes collection. Saved submissions can be fetched at review checkpoints; real-time updates are not required.
 
 **Open:** precise empty-slot artwork, keyboard/drag accessibility details, validation fields, duplicate handling, and whether the host can save an incomplete draft between sessions.
 
@@ -50,7 +50,7 @@ The room-wide maximum is 100 cards across everyone. At 100/100, disable further 
 
 **Permissions:** contributors can edit or remove their own cards during review. The creator can edit their own contributions and veto/remove any card from the shared deck, but cannot edit another contributor's card. Keep review actions simple; do not add broader room-management controls.
 
-**Live behavior:** accept new submissions and edits in real time during review. The deck is not final until voting starts. Handle remote changes without silently overwriting unsaved edits.
+**Submission behavior:** review the latest persisted submissions when entering or refreshing this screen. No live update stream is required. If collection remains open during review, the creator may fetch again before starting voting. The deck is not final until voting starts.
 
 **Voting boundary:** when the host starts voting, lock the active deck. The authoritative state layer must enforce the lock.
 
@@ -60,7 +60,7 @@ The room-wide maximum is 100 cards across everyone. At 100/100, disable further 
 
 **Confirmed invitation paths:** share the room code and QR code together; guests join by entering the code or scanning the QR from Home. Do not use joining links. Show only the aggregate guest count, not participant identities or a participant list.
 
-**Presence:** use a disconnect grace period so brief network interruptions do not immediately mark a participant as gone. The duration is open.
+**Presence:** do not track or display presence. A person who has not scanned the code is simply not contributing yet; collection stays open until the creator advances. Do not show who has joined or who is waiting.
 
 **Open:** exact lobby layout, whether collection activity is embedded here or shown separately, participant readiness indicators. Do not add participant moderation controls.
 
@@ -90,9 +90,7 @@ The room-wide maximum is 100 cards across everyone. At 100/100, disable further 
 
 **Purpose:** communicate that the guest has finished their current step and the room is waiting for the next phase.
 
-**Confirmed:** this is a dedicated screen, not merely an inert or unexplained loading state.
-
-**Open:** exact progress counts, participant-level visibility, Butters pose/animation, and whether guests can return to review their own submissions.
+**Confirmed:** this is a dedicated, per-device waiting screen shown after a contributor submits their cards or presses “I’m Done.” Use a character waiting animation, not a generic spinner. Other contributors may still be composing cards or may not have joined yet. Do not show progress counts, participant identities, or who is finished. The creator sees the same waiting treatment after submitting their own cards, with an additional creator-only control to advance the workflow.
 
 ## Resume / re-entry
 
@@ -140,6 +138,7 @@ Use a mobile-first responsive layout. The host review grid must adapt to screen 
 - Unused guest quota slots are not blank options.
 - Contributor edit/delete permissions for their own cards end when voting starts.
 - The creator may veto/remove cards before voting, but has no general administrator role.
-- Host review may change in real time until voting starts.
+- Collection remains open to late joiners until the creator advances; unsent drafts are excluded when collection closes.
+- No leave-room or immediate delete-room action exists; room data expires 24 hours after closure.
 - The voting deck is locked at the phase transition.
 - A loading or catch-up indicator should not unnecessarily block an otherwise usable screen.
