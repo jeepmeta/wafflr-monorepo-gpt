@@ -56,3 +56,10 @@ Implement platform-neutral operations for adding/updating/removing cards while t
 
 ## Test cases
 Cover minimum deck size, the 100-card cap, live review edits/submissions, card veto, deck lock, complete/changeable-until-submitted ballots, Yup tally, early end with submitted ballots, zero-ballot creator selection, one tie-breaker, persistent-tie creator selection, creator disconnect/reconnect, 10-minute automatic resolution, and consistent winner state across clients.
+
+## Minimal card schema and deduplication
+
+The user-facing card form has exactly two fields: `title` and `type`. For “Where to eat?”, an example is `title: "Bob’s Pizza"` and `type: "Pizza"`. The room-level decision category selects the client template and type options. Templates own presentation; the backend stores choice data and necessary system metadata, not visual layout or animation state.
+
+When the creator closes collection, fetch the submitted deck and present it alphabetically in a quick carousel/review flow. The creator can remove duplicates and joke or unsuitable entries before voting. Keep duplicate submissions separate by default; do not automatically merge them. This manual review prevents identical choices from needlessly producing a tie-breaker while preserving the ability to distinguish similarly named places. Collection closes when the creator advances, not when every invitee finishes.
+
