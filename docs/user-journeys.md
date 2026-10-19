@@ -45,3 +45,10 @@ Setup → Collecting (if enabled) → Reviewing → Voting → Tie-breaker (only
 
 ## Navigation and recovery
 Back, refresh, and rejoin must not create duplicate rooms or bypass the current phase. Show concise loading, disconnected, stale-room, and error states. Prefer preserving work and giving one clear recovery action over adding extra management steps.
+
+## Card data and final collection review
+
+Every card form exposes only two user-entered fields: the choice `title` and its `type`. In the restaurant example, “Bob’s Pizza” is the title and “Pizza” is the type. The room's category determines which client-side template renders the card and which type choices are offered. The backend stores those values plus required system metadata; it does not store card layout or animation details.
+
+When the creator decides collection is finished, they advance to review. This closes collection, so guests who have not submitted cannot add cards afterward; their unfinished drafts are excluded. The creator receives the submitted deck in alphabetical order and swipes through a quick carousel to remove duplicate choices or joke/inappropriate entries. Duplicates are not merged automatically. The creator can move to voting once at least two cards remain.
+
