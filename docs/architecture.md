@@ -12,33 +12,34 @@ Chosen stack: pnpm workspaces, Turborepo, TypeScript, React + Vite, Tailwind CSS
 **packages/ui:** genuinely reusable UI where a cross-platform strategy makes sense. Do not force web-only components into it.
 **packages/config:** shared tooling/configuration where it reduces duplication.
 
+## Room model and creation
+A room does not exist until the creator confirms creation. Creation establishes the room record, code, QR code, selected category, contribution mode, and initial lifecycle phase. From that point, the room can be shared or the creator can build the deck, depending on the chosen mode.
+
+There are exactly two mutually exclusive card-creation modes: creator-only (the creator creates the deck) or guest-contribution (the creator and guests independently submit cards under the same contribution limits). Do not model these as simultaneous collaboration modes.
+
+## No multiplayer or live-presence architecture
+A room is a persisted workflow and submission endpoint, not a social space. There is no chat, participant activity feed, visible identity list, presence, synchronized animation, or requirement for everyone to be online together. Clients do not need live room-state broadcasts or WebSocket connections. Participants can work independently and submit cards or ballots at explicit checkpoints.
+
+Use ordinary request/response operations against persisted room data. The creator fetches submitted cards when reviewing the deck, freezes the deck when starting voting, and retrieves submitted ballots to resolve the outcome. Refresh/re-entry loads the latest persisted phase and data. Use transactional or otherwise atomic server-side operations for critical boundaries, especially deck lock and ballot submission; this is data integrity, not multiplayer synchronization.
+
 ## Suggested domain entities
-These are conceptual, not finalized TypeScript definitions:
-- DecisionRoom: room ID, category, phase, host reference, options, participants, round metadata.
-- DecisionCategory: category identity, labels, option schema, card presentation configuration.
-- DecisionOption: stable ID, category-specific fields, submitter/reference, timestamps, and edit state as needed.
-- Participant: stable room-scoped identity and role, with privacy-conscious profile fields.
-- VotingRound: round ID, frozen deck/order, status, result.
-- Vote: participant and option references, response, timestamps/idempotency metadata as needed.
-- RoomEvent: conceptual changes such as joining, option submit/edit/remove, guest completion, phase transition, or vote recording.
+- DecisionRoom: room ID/code, category, contribution mode, phase, creator reference, deck, round metadata, and lifecycle timestamps.
+- DecisionCard: stable ID, category-specific fields, submitter reference, and edit state.
+- Ballot: participant/device-scoped reference and complete Yup/Nah responses for a round.
+- VotingRound: frozen deck/order, submitted ballots, and result.
 
-Do not finalize structures before deciding identity, persistence, realtime transport, and voting policy.
+Keep identity data minimal and anonymous. Do not add chat messages, presence records, participant activity events, or live-connection state.
 
-## Shared state and synchronization
-The host and guests need a consistent view of submissions and phase. During collection/review, changes are live. At voting start, the active deck is frozen. The authoritative state layer must enforce phase rules; client-side checks alone are not sufficient.
-
-Backend, database, real-time mechanism, hosting, and offline behavior are not selected. Separate domain policy (what is valid), application orchestration (which operation runs), persistence/synchronization (how state is stored and delivered), and presentation (what each screen renders).
-
-## Conceptual events
-Room creation, participant join, option submit/update/remove, guest completion, review entry, vote start, and vote recording are useful event concepts. Vote start should establish the exact deck snapshot for that round. These are not committed event names and do not require event sourcing.
+## Application and persistence boundaries
+Keep domain policy (what is valid), application orchestration (which operation runs), persistence (what is stored), and presentation (what each screen renders) separate. The backend/database provider is not selected. A conventional API plus persisted storage is sufficient; realtime transport is not a product requirement. Clients may refresh or explicitly fetch the latest room data at workflow transitions.
 
 ## PWA and mobile
 Build and validate responsive web/PWA first. Keep decision rules platform-neutral so Expo can reuse them. Share types and logic when stable; share UI only when platform differences permit a clean abstraction.
 
-Define PWA installability, icons, offline fallback, update behavior, and what happens when a room needs a live connection. Do not pretend shared live voting works offline if state cannot synchronize.
+Define PWA installability, icons, offline fallback, and update behavior. Offline editing may be supported later, but submissions and phase-changing actions require a successful server response; the product does not depend on a live connection between participants.
 
 ## Security and privacy
-Room links may grant access to a live group activity; design their access model deliberately. Never commit secrets. Validate important transitions at the authoritative layer. Decide discoverability, link revocation/expiry, identity, vote privacy, and data retention before production.
+Room codes and QR codes provide access to a persisted decision workflow. Never commit secrets. Validate important transitions at the authoritative layer. Decide code entropy, access controls, vote privacy, and data retention before production.
 
 ## Quality strategy
-Unit-test core rules and tally outcomes; test review-to-voting lock; test live changes across clients; test responsive layout, keyboard and screen-reader operation; verify PWA install/update behavior; add mobile parity checks when Expo is initialized. Run pnpm install, pnpm typecheck, pnpm lint, and pnpm build in a real environment. Earlier starter setup did not yet have verified local install/build results.
+Unit-test core rules and tally outcomes; test independent card and ballot submissions, persisted reload/resume, review-to-voting lock, duplicate/retried requests, and outcome resolution; test responsive layout, keyboard and screen-reader operation; verify PWA install/update behavior; add mobile parity checks when Expo is initialized. Run pnpm install, pnpm typecheck, pnpm lint, and pnpm build in a real environment. Earlier starter setup did not yet have verified local install/build results.
