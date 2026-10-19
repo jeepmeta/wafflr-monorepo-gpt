@@ -11,13 +11,13 @@ The creator chooses one of two setup paths:
 - **Invite guests to create cards:** guests contribute under the same card-submission rules as the creator; the creator contributes cards too. The creator can veto cards during final review, but cannot otherwise manage participants.
 
 ## Shared room journey
-**Create and join:** The creator creates a room. Guests join using the room code or QR code from the Home screen. Everyone shares one room state. The room represents one decision only.
+**Create and join:** The creator creates a room. Guests join by entering the room code or scanning the QR code from the Home screen. Everyone shares one room state. The room represents one decision only.
 
 **Collect cards:** The creator may choose to create the whole deck or allow guest submissions. When guest submissions are enabled, the creator is also a card contributor. Guests may submit within the chosen per-guest limit and can edit or delete their own cards until voting starts. A room-wide cap of 100 cards applies across everyone. At 100/100, new submissions are disabled and the room shows “Room full — 100/100 cards.”
 
 **Finish contributing:** Guests can press “I’m Done” even with unused slots; unused slots are skipped. This does not prevent the creator from moving forward.
 
-**Review and veto:** The creator reviews the shared deck in a responsive grid and can edit or remove cards, reusing the card editor with Save or Cancel. New submissions and edits remain live during review. The creator’s veto power applies before voting starts. The creator can start voting at any time once at least two cards exist, even if guests have unused slots or have not pressed “I’m Done.”
+**Review and veto:** The creator reviews the shared deck in a responsive grid and can veto/remove cards before voting starts. Contributors can edit or delete their own cards during review; the creator does not edit other contributors' cards. New submissions and edits remain live during review. The creator’s veto power applies before voting starts. The creator can start voting at any time once at least two cards exist, even if guests have unused slots or have not pressed “I’m Done.”
 
 **Start voting:** Starting voting locks the deck and closes submissions. The room announces the start, shows a brief synchronized countdown, and then all eligible participants enter the voting experience. A late joiner after voting starts is view-only.
 
