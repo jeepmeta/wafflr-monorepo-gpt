@@ -9,9 +9,9 @@ Butters is the named cute waffle mascot. The desired direction is app-like, with
 The future character spec should define canonical silhouette, waffle-grid treatment, face/expressions, approved palette and outlines, proportions at small sizes, animation states, source file location, export rules, and reduced-motion alternatives. Do not invent canonical colors, exact anatomy, catchphrases, or timing before they are selected.
 
 ## Food-character family
-Character exploration includes playfully cute food characters, eye-popping colors, and transparent/alpha backgrounds. The style direction includes arms and legs that match each character’s colors and unique tennis shoes for each character. They are intended to help signify restaurant types or categories.
+Character exploration includes playfully cute food characters, eye-popping colors, and transparent/alpha backgrounds. The style direction includes arms and legs that match each character’s colors and unique tennis shoes for each character.
 
-Keep the family visually coherent while ensuring each character is recognizable at small sizes. For every approved character, eventually record name, food/category represented, silhouette, palette, expressions, poses, source asset, exports, UI use, and contrast notes. Final names and roster remain open.
+Keep the family visually coherent while ensuring each character is recognizable at small sizes. For every approved character, eventually record name, silhouette, palette, expressions, poses, source asset, exports, UI use, and contrast notes. Final names and roster remain open.
 
 ## Art direction
 - Cute, playful, polished, and app-friendly.
