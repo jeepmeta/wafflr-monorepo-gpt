@@ -12,14 +12,18 @@ The engine turns one shared room, a locked deck, and submitted ballots into a cl
 - **Ballot:** one participant’s final set of Yup/Nah responses.
 - **Round:** the initial vote or the single tie-breaker round.
 
-## Shared room and permissions
-All participants operate on the same room and authoritative phase. If the creator enables guest card creation, the creator contributes cards under the same rules as guests. The creator is not a general administrator. Their extra powers are limited to pre-vote card veto, early end of voting, and final selection after a persistent tie. The creator does not edit other contributors' cards.
+## Room workflow and permissions
+A room is created only after the creator confirms creation. It receives a room code and QR code and persists until its lifecycle ends. The creator chooses exactly one card-creation mode: creator-only, or guest contributions. In guest-contribution mode, the creator contributes under the same card quota as guests.
+
+This is not a multiplayer or social room. There is no chat, participant activity feed, visible participant identity, or presence. Contributors work independently and submit cards; the creator fetches the submitted deck for review. Participants submit ballots independently after voting begins. Data is shared through persisted room records and explicit API operations, not continuous real-time synchronization.
+
+The creator is not a general administrator. Their extra powers are limited to pre-vote card veto, early end of voting, and final selection after a persistent tie. The creator does not edit other contributors' cards.
 
 ## Deck creation and review
 - The creator may build all cards themselves or enable guest contributions.
 - The room-wide maximum is 100 cards across creator and guests. At 100/100, disable further submissions and show “Room full — 100/100 cards.”
 - Contributors can edit or delete their own cards until voting starts. The creator can veto/remove cards from the shared deck during final review, but does not edit other contributors' cards.
-- New submissions and edits remain live during review until voting starts.
+- Submissions and edits are persisted when contributors explicitly save them. The creator refreshes or fetches the deck to review the latest submitted version; no live update stream is required.
 - At least two cards are required to start voting. If fewer than two remain, keep Start Voting disabled until another card is added.
 - Starting voting atomically locks the deck and closes submissions.
 
@@ -39,12 +43,12 @@ The Winner screen displays only the winning card, Butters celebrating, and confe
 ## Domain operations
 Implement platform-neutral operations for adding/updating/removing cards while the deck is editable, freezing the deck at voting start, validating ballots, tallying submitted Yup responses, detecting ties, managing the one tie-breaker round, applying creator actions, and resolving creator-disconnect timeout. Keep persistence and real-time transport separate from domain rules.
 
-## Concurrency and integrity
+## Persistence and integrity
 - Enforce permissions and phase boundaries in the authoritative state layer, not just by hiding UI controls.
 - Starting voting must atomically freeze the deck and close submissions.
-- Reject stale post-lock edits/submissions.
-- Keep all clients aligned to the same phase and deck after reconnect or refresh.
-- Ensure repeat taps, duplicate deliveries, simultaneous phase changes, and reconnects cannot create inconsistent ballots or multiple winners.
+- Reject post-lock edits and submissions.
+- Each client loads persisted state when entering a workflow step or returning to a room; clients do not need to remain connected to each other.
+- Make submissions safe to retry and prevent duplicate ballots, invalid phase transitions, and multiple winners.
 
 ## Test cases
 Cover minimum deck size, the 100-card cap, live review edits/submissions, card veto, deck lock, complete/changeable-until-submitted ballots, Yup tally, early end with submitted ballots, zero-ballot creator selection, one tie-breaker, persistent-tie creator selection, creator disconnect/reconnect, 10-minute automatic resolution, and consistent winner state across clients.
