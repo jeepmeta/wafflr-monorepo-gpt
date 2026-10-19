@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "dependencies": {
+    "@wafflr/config": "workspace:*"
+  },
   "exports": {
     ".": "./src/index.tsx",
     "./styles.css": "./src/styles.css"
