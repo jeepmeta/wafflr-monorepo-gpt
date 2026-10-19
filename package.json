@@ -3,7 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "packageManager": "pnpm@10.18.1",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
@@ -15,6 +17,8 @@
   "devDependencies": {
     "prettier": "^3.6.2",
     "turbo": "^2.5.8",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0"
   }
 }
