@@ -45,3 +45,14 @@ Room codes and QR codes provide access to a persisted decision workflow. Never c
 
 ## Quality strategy
 Unit-test core rules and tally outcomes; test independent card and ballot submissions, persisted reload/resume, review-to-voting lock, duplicate/retried requests, and outcome resolution; test responsive layout, keyboard and screen-reader operation; verify PWA install/update behavior; add mobile parity checks when Expo is initialized. Run pnpm install, pnpm typecheck, pnpm lint, and pnpm build in a real environment. Earlier starter setup did not yet have verified local install/build results.
+
+## Minimal card payload and creator review gate
+
+A card is a small data object rendered by a category-specific client template. The persisted user-entered fields are exactly:
+- `title`: the choice name (for example, “Bob’s Pizza”).
+- `type`: the choice subtype (for example, “Pizza”).
+
+The room's decision category selects the template and the available type options; it is room-level configuration, not another user-entered field on every card. Do not persist presentation details, animations, image assets, or template-specific layout in card records. The client renders the stored title and type through the appropriate template. Keep stable IDs and the minimum technical metadata required to enforce ownership, ordering, quotas, and voting; these are system metadata, not extra card-form fields.
+
+After the creator advances from collection, new submissions close and the creator fetches the submitted cards. Present a fast, alphabetically ordered carousel or equivalent swipe-through review. The creator can remove duplicate choices and inappropriate/joke submissions. Duplicate candidates remain separate until the creator removes one; do not auto-merge them or let duplicate choices create a pointless tie-breaker. The creator may proceed when ready without waiting for every invitee. The deck is frozen when voting starts.
+
