@@ -73,7 +73,10 @@ Tap a card to edit it. Confirm before deleting a card. Images are optional. At t
 
 - Use a responsive card grid for final review.
 - Contributors can edit or remove their own cards before voting starts. The creator can edit their own cards and veto/remove any card from the shared deck, but cannot edit other contributors' cards.
-- Continue accepting new submissions and edits in real time during review.
+- Guests may join and submit cards while collection is open, even if other contributors have already submitted and are waiting.
+- Each contributor sees only their own progress. After submitting or pressing “I’m Done,” they see a character waiting screen; no shared completion/presence status is shown.
+- The creator may advance to review without waiting for everyone to join or finish. Only submitted cards enter the deck; unsent drafts are excluded. Advancing closes collection.
+- The creator fetches the latest persisted deck for review; real-time broadcasts are not required.
 - Lock the deck when voting starts. The lock must be enforced by the authoritative state layer, not only by hiding UI controls.
 - The creator's only additional powers beyond normal participation are pre-vote veto, ending voting early, and final winner selection if the tie-breaker remains tied.
 
@@ -92,7 +95,8 @@ The following decisions were confirmed after Decision 32. They supersede earlier
 - The creator selects a per-guest contribution quota of one, two, or three cards.
 - The room-wide maximum is 100 cards across everyone. At 100/100, disable new submissions and show “Room full — 100/100 cards.” The creator can still review and veto/remove cards, and start voting if at least two remain.
 - Guests can edit/delete their own cards until voting starts. The creator can veto/remove cards from the shared deck during final review. When guest contribution is enabled, the creator does not edit other contributors' cards; their extra power is veto only.
-- Guests can press “I’m Done” with unused slots; unused slots are skipped. This does not prevent the creator from starting voting.
+- Guests can press “I’m Done” with unused slots; unused slots are skipped. This does not prevent the creator from advancing. Each contributor waits independently after submitting; other people may still be working or may join late until collection closes.
+- The creator can advance even if some invitees have not joined or some joined contributors have not submitted. Unsubmitted drafts are excluded.
 - New submissions and edits are accepted live during review. The creator can start voting at any time once at least two cards exist, even if guests have not finished contributing. Starting voting locks the deck and closes submissions.
 - If fewer than two cards remain, voting stays disabled until another card is added.
 
@@ -118,8 +122,15 @@ The following decisions were confirmed after Decision 32. They supersede earlier
 - No nicknames or participant list. Show guest count only; no one, including the creator, can identify individual participants.
 - Guests join by entering a room code or scanning a QR code from Home; no joining links.
 - Each room represents one decision only.
-- The room closes automatically after the winner celebration and expires 24 hours after closure. Then room, cards, and individual decision data are permanently deleted.
+- There is no leave-room or immediate delete-room control. Participants do not need to leave; the room closes automatically after the winner celebration and expires 24 hours after closure. Then room, cards, and individual decision data are permanently deleted.
 - An anonymous account ID is created in the background on first use, with no signup or email. Each device has its own ID and independent counters; no recovery or linking across devices. The participation counter increments on successful room join, even if the user leaves before voting.
+
+### Collection and waiting clarification
+
+- Collection remains open to late joiners until the creator advances the workflow.
+- Each person submits cards independently. After submitting their cards or pressing “I’m Done,” they see a character waiting screen on their own device. This does not indicate that everyone else has finished.
+- The creator may advance to review without waiting for every invitee to join or finish. Unsubmitted drafts are excluded from the deck, and advancing closes collection.
+- Do not add participant presence, per-person completion indicators, leave-room controls, or immediate room deletion. The normal room lifecycle handles closure and 24-hour post-closure deletion.
 
 ## Cross-document consequences
 
