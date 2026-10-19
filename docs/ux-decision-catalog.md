@@ -69,12 +69,13 @@ Tap a card to edit it. Confirm before deleting a card. Images are optional. At t
 - Guests can finish even if they have unused submission slots; unused slots are skipped and do not become blank cards.
 - Provide a dedicated guest waiting screen.
 
-## Decision 32 — Host final deck review and live changes
+## Decision 32 — Final deck review and live changes (clarified by the shared-room principle)
 
-- Use a responsive card grid for the host's final deck review, with edit and remove controls.
-- Reuse the existing card editor/form for review edits, with Save and Cancel.
+- Use a responsive card grid for final review.
+- Contributors can edit or remove their own cards before voting starts. The creator can edit their own cards and veto/remove any card from the shared deck, but cannot edit other contributors' cards.
 - Continue accepting new submissions and edits in real time during review.
 - Lock the deck when voting starts. The lock must be enforced by the authoritative state layer, not only by hiding UI controls.
+- The creator's only additional powers beyond normal participation are pre-vote veto, ending voting early, and final winner selection if the tie-breaker remains tied.
 
 ## Decisions 33–79 — Shared-room and voting rules
 
