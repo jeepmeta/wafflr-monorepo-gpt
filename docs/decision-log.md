@@ -18,13 +18,19 @@ Record new decisions here and update affected docs in the same change. Treat a d
 - TypeScript, React, Vite, Tailwind CSS v4, and PWA support.
 - Platform-neutral decision logic belongs in a shared core package.
 
-## Confirmed group flow
+## Confirmed group flow and core principle
 
-- Guests can join via shared link or QR code.
-- Participants can submit one or more choices.
-- Voting uses a card-deck interaction concept.
-- Swipe right means yes/keep; swipe left means no/reject.
-- Ties may trigger another voting round.
+- A room is one shared game for one decision. Every participant sees the same cards and authoritative room phase.
+- The creator chooses to build all cards or invite guests to contribute cards. When guest contribution is enabled, the creator contributes under the same rules as guests.
+- The creator has only three additional powers: veto cards before voting, end voting early if the game is stuck or delayed, and select a winner if the tie-breaker round remains tied.
+- Guests join by entering the room code or scanning the QR code from Home; no joining links.
+- Room-wide limit: 100 cards across all contributors. New submissions stop at 100/100.
+- Voting requires at least two cards. Starting voting locks the deck and closes submissions.
+- Swipe right or tap Yup approves; swipe left or tap Nah rejects. Every card requires a response before ballot submission; choices can change until Submit Votes, after which the ballot is final.
+- The highest submitted Yup count wins; Nah votes do not subtract. If the creator ends voting with no submitted ballots, they choose a winner.
+- A tie triggers one tie-breaker round with tied cards only. If it remains tied, the creator selects the winner.
+- The winner view shows only the winning card, Butters celebration, and confetti; no totals or losing-card details.
+- After a short celebration, the room closes. The Winner screen remains accessible for 24 hours after closure, then room and decision data are deleted.
 
 ## Confirmed UX decisions
 
@@ -34,13 +40,14 @@ Decisions 19–32 are detailed in the [UX decision catalog](./ux-decision-catalo
 - Room-creation failure preserves local card drafts and provides Retry.
 - Resuming a room restores the exact phase, controls, and progress, with nonblocking catch-up.
 - Guests receive editable random nicknames; duplicate names receive suffixes, and a persistent anonymous device token supports continuity on that device.
-- Room Setup uses selectable cards and a guest quota of one, two, or three submissions, defaulting to three.
-- Host card entry supports up to twenty-five cards in a five-by-five grid; additions stop at capacity.
-- A guest's submission action is “Add to Deck”; guests can edit/delete their submissions until voting begins.
-- A deck needs at least three cards before Build Deck is enabled. The host can reorder cards before voting.
-- Guests can choose “I’m Done” with unused slots; unused slots are skipped.
-- Host final review uses a responsive grid with edit/remove controls and the shared editor's Save/Cancel behavior.
-- Submissions and edits remain live during review. Starting voting locks the deck at the authoritative state layer.
+- Room Setup lets the creator choose whether to create all cards or allow guest contributions; if guest contribution is enabled, the creator participates as a contributor.
+- Guest quota is one, two, or three cards per guest, chosen during setup. Unused slots are skipped when a guest presses “I’m Done.”
+- The 100-card room-wide cap applies to all contributors. At capacity, disable submissions and show “Room full — 100/100 cards.”
+- Guests can edit/delete their own cards until voting starts; the creator reviews the shared deck in a responsive grid and can edit/remove cards, veto cards, and use Save/Cancel.
+- New submissions and edits remain live during review. Starting voting locks the deck at the authoritative state layer and closes submissions.
+- Voting requires at least two cards. The creator can start at any time once the minimum is met, even if guests have unused slots or have not pressed “I’m Done.”
+- Creator powers are limited to pre-vote veto, ending voting early, and final winner selection if the tie-breaker remains tied.
+- If the creator disconnects for 10 minutes during voting or a tie-breaker, automatically resolve using submitted ballots; if none exist, randomly select from the relevant cards.
 
 The current source context did not contain the exact selections for Decisions 1–18. Do not infer or invent them; recover their original records and append them to the catalog.
 
@@ -48,19 +55,15 @@ The current source context did not contain the exact selections for Decisions 1�
 
 ### Voting and results
 
-- What exact tally determines the winner? Swipe meanings are known; final scoring is not.
-- Does everyone vote on every option? Can participants skip, undo, or change votes?
-- Are votes anonymous? Can anyone see individual responses?
-- What is the exact tie condition and tie-break procedure?
-- What happens if every option is rejected, none receives approval, or participation is incomplete?
-- Must all participants finish before results are revealed?
+- Vote tally, ballot completeness, vote changes, one tie-breaker round, persistent-tie selection, and zero-ballot behavior are confirmed in the UX catalog. Do not reopen them as questions.
+- Individual votes and totals are not shown on the Winner screen. The broader ballot-privacy implementation must not reveal identities or individual responses.
 
 ### Room and participant model
 
 - What is the disconnect grace-period duration?
 - What are the privacy, reset, and cross-device rules for anonymous device tokens?
-- Can the host remove participants or close a room?
-- Are links revocable or time-limited? How long are rooms retained?
+- Do not add general creator administration, participant removal, or extra room-management controls unless the product direction explicitly changes.
+- Joining links are not used; guests enter a room code or scan its QR code. Room and decision data are deleted 24 hours after closure.
 
 ### Creation and option data
 
