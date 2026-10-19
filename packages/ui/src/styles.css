@@ -1,4 +1,4 @@
-@import "../../../packages/config/src/tokens.css";
+@import "@wafflr/config/tokens.css";
 
 .wf-button { display:inline-flex; align-items:center; justify-content:center; gap:.6rem; border:1px solid transparent; border-radius:var(--wafflr-radius-md); font:700 1rem/1 var(--wafflr-font-body); min-height:2.75rem; padding:.85rem 1.1rem; transition:transform var(--wafflr-motion-fast),background var(--wafflr-motion-fast),box-shadow var(--wafflr-motion-fast); cursor:pointer; }
 .wf-button:hover:not(:disabled) { transform:translateY(-1px); }
