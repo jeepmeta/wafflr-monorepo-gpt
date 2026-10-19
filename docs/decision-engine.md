@@ -13,12 +13,12 @@ The engine turns one shared room, a locked deck, and submitted ballots into a cl
 - **Round:** the initial vote or the single tie-breaker round.
 
 ## Shared room and permissions
-All participants operate on the same room and authoritative phase. If the creator enables guest card creation, the creator contributes cards under the same rules as guests. The creator is not a general administrator. Their extra powers are limited to pre-vote card veto, early end of voting, and final selection after a persistent tie.
+All participants operate on the same room and authoritative phase. If the creator enables guest card creation, the creator contributes cards under the same rules as guests. The creator is not a general administrator. Their extra powers are limited to pre-vote card veto, early end of voting, and final selection after a persistent tie. The creator does not edit other contributors' cards.
 
 ## Deck creation and review
 - The creator may build all cards themselves or enable guest contributions.
 - The room-wide maximum is 100 cards across creator and guests. At 100/100, disable further submissions and show “Room full — 100/100 cards.”
-- Guests can edit or delete their own cards until voting starts. The creator can edit/remove cards during final review and veto cards before voting.
+- Contributors can edit or delete their own cards until voting starts. The creator can veto/remove cards from the shared deck during final review, but does not edit other contributors' cards.
 - New submissions and edits remain live during review until voting starts.
 - At least two cards are required to start voting. If fewer than two remain, keep Start Voting disabled until another card is added.
 - Starting voting atomically locks the deck and closes submissions.
