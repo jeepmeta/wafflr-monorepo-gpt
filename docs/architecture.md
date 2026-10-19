@@ -17,6 +17,8 @@ A room does not exist until the creator confirms creation. Creation establishes 
 
 There are exactly two mutually exclusive card-creation modes: creator-only (the creator creates the deck) or guest-contribution (the creator and guests independently submit cards under the same contribution limits). Do not model these as simultaneous collaboration modes.
 
+In guest-contribution mode, the room remains open to new guests until the creator advances the workflow. Guests may join late and submit their cards while collection is open. Each person’s submission progress is private to that device: after submitting their cards or pressing “I’m Done,” they see a character waiting screen while others may still be composing or may not have joined yet. The creator can advance to review without waiting for every invited person to join or finish; unfinished and unsubmitted drafts are not part of the deck.
+
 ## No multiplayer or live-presence architecture
 A room is a persisted workflow and submission endpoint, not a social space. There is no chat, participant activity feed, visible identity list, presence, synchronized animation, or requirement for everyone to be online together. Clients do not need live room-state broadcasts or WebSocket connections. Participants can work independently and submit cards or ballots at explicit checkpoints.
 
@@ -28,7 +30,7 @@ Use ordinary request/response operations against persisted room data. The creato
 - Ballot: participant/device-scoped reference and complete Yup/Nah responses for a round.
 - VotingRound: frozen deck/order, submitted ballots, and result.
 
-Keep identity data minimal and anonymous. Do not add chat messages, presence records, participant activity events, or live-connection state.
+Keep identity data minimal and anonymous. Do not add chat messages, presence records, participant activity events, live-connection state, leave-room actions, or immediate room-deletion controls. Participants do not need to leave: the room follows its lifecycle and its stored decision data is permanently deleted after the 24-hour post-closure retention window.
 
 ## Application and persistence boundaries
 Keep domain policy (what is valid), application orchestration (which operation runs), persistence (what is stored), and presentation (what each screen renders) separate. The backend/database provider is not selected. A conventional API plus persisted storage is sufficient; realtime transport is not a product requirement. Clients may refresh or explicitly fetch the latest room data at workflow transitions.
