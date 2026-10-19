@@ -89,8 +89,8 @@ The following decisions were confirmed after Decision 32. They supersede earlier
 ### Card contribution and review
 
 - The creator selects a per-guest contribution quota of one, two, or three cards.
-- The room-wide maximum is 100 cards across everyone. At 100/100, disable new submissions and show “Room full — 100/100 cards.” The creator can still review, edit, remove/veto cards, and start voting if at least two remain.
-- Guests can edit/delete their own cards until voting starts. The creator can edit/remove cards during final review.
+- The room-wide maximum is 100 cards across everyone. At 100/100, disable new submissions and show “Room full — 100/100 cards.” The creator can still review and veto/remove cards, and start voting if at least two remain.
+- Guests can edit/delete their own cards until voting starts. The creator can veto/remove cards from the shared deck during final review. When guest contribution is enabled, the creator does not edit other contributors' cards; their extra power is veto only.
 - Guests can press “I’m Done” with unused slots; unused slots are skipped. This does not prevent the creator from starting voting.
 - New submissions and edits are accepted live during review. The creator can start voting at any time once at least two cards exist, even if guests have not finished contributing. Starting voting locks the deck and closes submissions.
 - If fewer than two cards remain, voting stays disabled until another card is added.
@@ -122,7 +122,7 @@ The following decisions were confirmed after Decision 32. They supersede earlier
 
 ## Cross-document consequences
 
-Keep product vision, journeys, screen catalog, decision engine, and architecture aligned with this shared-room principle. Older entries above that describe host-only card creation, a three-card minimum, twenty-five total host cards as the room cap, participant nicknames, joining links, or a general host-admin role are superseded by the decisions in this section. The creator's three additional powers are exhaustive; avoid adding management mechanics or asking the user to decide routine edge cases.
+Keep product vision, journeys, screen catalog, decision engine, and architecture aligned with this shared-room principle. Older entries above that describe host-only card creation, a three-card minimum, twenty-five total host cards as the room cap, participant nicknames, joining links, general host editing of guests' cards, or a general host-admin role are superseded by the decisions in this section. The creator's three additional powers are exhaustive; avoid adding management mechanics or asking the user to decide routine edge cases.
 
 ## Future decision entry template
 
