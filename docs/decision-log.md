@@ -20,8 +20,9 @@ Record new decisions here and update affected docs in the same change. Treat a d
 
 ## Confirmed group flow and core principle
 
-- A room is one shared game for one decision. Every participant sees the same cards and authoritative room phase.
-- The creator chooses to build all cards or invite guests to contribute cards. When guest contribution is enabled, the creator contributes under the same rules as guests.
+- A room is a persisted workflow for one decision, not a live social space or multiplayer game. It is created only when the creator confirms creation, then receives a room code and QR code.
+- The creator chooses exactly one card-creation mode: create all cards, or enable independent guest contributions. When guest contribution is enabled, the creator contributes under the same rules as guests.
+- There is no chat, participant activity feed, visible identity list, presence, or requirement for real-time client synchronization. Guests do not see each other's work. Cards and ballots are shared through explicit submissions and persisted room data.
 - The creator has only three additional powers: veto cards before voting, end voting early if the game is stuck or delayed, and select a winner if the tie-breaker round remains tied.
 - Guests join by entering the room code or scanning the QR code from Home; no joining links.
 - Room-wide limit: 100 cards across all contributors. New submissions stop at 100/100.
@@ -44,7 +45,7 @@ Decisions 19–32 are detailed in the [UX decision catalog](./ux-decision-catalo
 - Guest quota is one, two, or three cards per guest, chosen during setup. Unused slots are skipped when a guest presses “I’m Done.”
 - The 100-card room-wide cap applies to all contributors. At capacity, disable submissions and show “Room full — 100/100 cards.”
 - Guests can edit/delete their own cards until voting starts; the creator reviews the shared deck in a responsive grid and can veto/remove cards. Contributors can edit their own cards; the creator does not edit other contributors' cards.
-- New submissions and edits remain live during review. Starting voting locks the deck at the authoritative state layer and closes submissions.
+- Card submissions and edits are saved explicitly. The creator fetches the submitted deck for review; live broadcasts are not required. Starting voting locks the deck at the authoritative state layer and closes submissions.
 - Voting requires at least two cards. The creator can start at any time once the minimum is met, even if guests have unused slots or have not pressed “I’m Done.”
 - Creator powers are limited to pre-vote veto, ending voting early, and final winner selection if the tie-breaker remains tied.
 - If the creator disconnects for 10 minutes during voting or a tie-breaker, automatically resolve using submitted ballots; if none exist, randomly select from the relevant cards.
@@ -72,20 +73,20 @@ The current source context did not contain the exact selections for Decisions 1�
 - What counts as a duplicate?
 - Can the host start review/voting while participants are still joining?
 
-### Live collaboration
+### Persistence and request integrity
 
-- What if a remote edit arrives while the host is editing the same card?
-- How are live changes communicated?
-- How should disconnected clients recover?
-- What happens if two host actions race to start voting?
+- Which backend and database will persist rooms, cards, and ballots?
+- What room-code entropy and access controls are appropriate?
+- How should retried submissions be made idempotent?
+- What happens if two creator requests attempt to start voting at nearly the same time?
 - Can a room be reopened or a round restarted?
 
 ### Design and platform
 
 - What are the final route names and navigation structure?
 - What colors, typography, logo lockup, mascot expressions, and animation rules are canonical?
-- What backend, database, authentication, real-time transport, hosting, and analytics will be used?
-- What does offline PWA behavior mean for a live shared room?
+- What backend, database, access control, hosting, and analytics will be used?
+- What offline PWA behavior should be supported for locally drafted but not-yet-submitted work?
 - When should Expo work begin, and which UI components should be shared?
 
 ## Suggested priority
