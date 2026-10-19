@@ -58,19 +58,19 @@ The room-wide maximum is 100 cards across everyone. At 100/100, disable further 
 
 **Purpose:** let the host invite people and see room status.
 
-**Confirmed invitation paths:** shareable room link and QR code. Participant counts should be aggregate rather than exposing unnecessary connection details.
+**Confirmed invitation paths:** share the room code and QR code together; guests join by entering the code or scanning the QR from Home. Do not use joining links. Show only the aggregate guest count, not participant identities or a participant list.
 
 **Presence:** use a disconnect grace period so brief network interruptions do not immediately mark a participant as gone. The duration is open.
 
-**Open:** exact lobby layout, whether collection activity is embedded here or shown separately, participant readiness indicators, and host moderation controls.
+**Open:** exact lobby layout, whether collection activity is embedded here or shown separately, participant readiness indicators. Do not add participant moderation controls.
 
 ## Guest join and room preview
 
 **Purpose:** get a guest into the correct room with minimal friction.
 
-**Confirmed join flow:** show a branded room preview before asking for a nickname. For an invalid or expired code, explain the problem in friendly language and offer Retry and Home.
+**Confirmed join flow:** have guests choose Join Room from Home, then enter the room code or scan its QR code. For an invalid or expired code, explain the problem in friendly language and offer Retry and Home.
 
-**Identity:** provide an editable random nickname; add a suffix for duplicate nicknames. A persistent anonymous device token supports continuity on the same device. Token reset, privacy, and cross-device behavior remain open.
+**Identity:** do not ask for or display nicknames, and do not show a participant list. Only guest count is visible; no one, including the creator, can identify individual guests. An anonymous account ID is created in the background on first use, with independent counters per device and no signup/email or cross-device recovery.
 
 **Capacity:** do not impose a fixed product-level participant limit. Operational safeguards may still be needed.
 
@@ -80,7 +80,7 @@ The room-wide maximum is 100 cards across everyone. At 100/100, disable further 
 
 **Confirmed controls:** the submission action is labeled “Add to Deck.” After submitting a card, a guest may add another while quota remains. Show one to three quota slots, marked empty, draft, or submitted.
 
-**Editing:** guests may edit or delete submitted cards until the host starts voting.
+**Editing:** contributors may edit or delete their own cards until voting starts. The creator may veto/remove cards from the shared deck before voting but does not edit other contributors' cards.
 
 **Completion:** show “I’m Done.” Guests may finish with unused slots; unused slots are skipped and never converted into blank cards.
 
@@ -98,7 +98,7 @@ The room-wide maximum is 100 cards across everyone. At 100/100, disable further 
 
 **Purpose:** restore an existing room without forcing the user to restart the flow.
 
-**Confirmed host behavior:** restore the exact current phase, host controls, and progress. Show brief, nonblocking catch-up while current shared state is synchronized.
+**Confirmed host behavior:** restore the exact current phase, available controls, and progress. The creator's available controls are limited to pre-vote card veto, ending voting early, and final winner selection if the tie-breaker remains tied. Show brief, nonblocking catch-up while current shared state is synchronized.
 
 **Recovery states:** loading, stale room, expired room, disconnected, and synchronization failure. Explain the next action instead of exposing technical stack traces.
 
@@ -128,7 +128,7 @@ One tie-breaker round contains only the cards tied for the highest Yup count. If
 
 ## Shared loading, error, and recovery states
 
-Cover invalid/expired links, join failures, room-creation failure, connection loss, failed submissions, rejected edits, phase changes elsewhere, and attempts to vote on a stale deck. Explain what happened and the next available action. Preserve user-entered work whenever possible.
+Cover invalid/expired room codes, join failures, room-creation failure, connection loss, failed submissions, rejected edits, phase changes elsewhere, and attempts to vote on a stale deck. Explain what happened and the next available action. Preserve user-entered work whenever possible.
 
 ## Responsive design and accessibility
 
@@ -138,7 +138,8 @@ Use a mobile-first responsive layout. The host review grid must adapt to screen 
 
 - Re-entry restores the room's authoritative current phase.
 - Unused guest quota slots are not blank options.
-- Guest edit/delete permissions end when voting starts.
+- Contributor edit/delete permissions for their own cards end when voting starts.
+- The creator may veto/remove cards before voting, but has no general administrator role.
 - Host review may change in real time until voting starts.
 - The voting deck is locked at the phase transition.
 - A loading or catch-up indicator should not unnecessarily block an otherwise usable screen.
