@@ -28,7 +28,7 @@ Migrations live in `supabase/migrations/`:
 - `20261020190000_initial_room_schema.sql` creates `rooms`, `participants`, `cards`, `voting_rounds`, `ballots`, and `ballot_responses`; adds constraints, indexes, timestamps, same-room foreign keys; enables RLS; and revokes direct table access from `anon` and `authenticated`.
 - `20261020191000_room_entry_rpcs.sql` adds `create_room`, `join_room`, and `get_room_snapshot`. They run with a fixed empty search path, have explicit execute grants, return a room-scoped random participant secret only at creation/join, store only its SHA-256 digest, and verify that secret before returning a snapshot.
 
-The room code is currently 12 hexadecimal characters (48 bits of entropy) and is case-normalized. This is a temporary concrete choice, not a final UX decision.
+The room code is currently 12 characters from a 32-symbol ambiguity-reduced alphabet (60 bits of entropy) and is case-normalized. This is a temporary concrete choice, not a final UX decision.
 
 **Important limitations before public launch:**
 
