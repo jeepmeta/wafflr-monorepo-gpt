@@ -217,6 +217,11 @@ begin
     'contribution_mode', v_room.contribution_mode,
     'cards_per_participant', v_room.cards_per_participant,
     'active_round_id', v_room.active_round_id,
+    'active_round_eligible_card_ids', coalesce((
+      select pg_catalog.to_jsonb(vr.eligible_card_ids)
+      from public.voting_rounds vr
+      where vr.id = v_room.active_round_id and vr.room_id = v_room.id
+    ), '[]'::jsonb),
     'closed_at', v_room.closed_at,
     'expires_at', v_room.expires_at,
     'participant_id', v_participant.id,

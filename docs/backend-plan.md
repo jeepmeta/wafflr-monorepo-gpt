@@ -1,6 +1,6 @@
 # Backend Plan
 
-**Status:** Six versioned migrations are committed and have passed a clean local Supabase migration run in GitHub Actions. All 26 pgTAP assertions pass, and the web token/typecheck/build job passes. No hosted Supabase project is connected yet. Rate limiting, scheduled cleanup/fallback execution, realtime authorization, and web integration remain unimplemented.
+**Status:** Six versioned migrations pass clean local Supabase CI, including 28 pgTAP assertions. The web app now has an opt-in RPC-backed shared-room MVP for create/join, card contribution, voting, and result/tie flow. No hosted Supabase project is connected yet. Rate limiting, scheduled cleanup/fallback execution, and room-scoped realtime authorization remain unimplemented.
 
 ## Responsibilities
 
@@ -41,8 +41,35 @@ The room code is currently 12 characters from a 32-symbol ambiguity-reduced alph
 - Creation/join RPCs do not yet implement request rate limits, abuse controls, or a robust per-client creation throttle. Add those before public exposure; room codes are not secrets that replace rate limiting.
 - `finish_contribution` and the trusted stale-host/cleanup functions exist, but they are not scheduled or connected to the web app. The client must call `heartbeat_participant` regularly before the ten-minute fallback is scheduled; otherwise an active host could appear disconnected. A trusted worker/cron job must call `resolve_stale_host_rooms` and `delete_expired_rooms`.
 - There are no room-scoped realtime authorization policies yet. Direct table access remains revoked; do not connect the browser to the tables or assume realtime synchronization works.
-- The snapshot returns the room's cards after participant-secret verification. It does not expose ballots or vote totals.
-- Secrets are returned only once. Client-side persistence/recovery and token rotation/revocation still need a defined implementation.
+- The snapshot returns the room's cards and active round's eligible card IDs after participant-secret verification. It does not expose ballots or individual vote details.
+- The web MVP stores the participant identity in `sessionStorage` for the current browser tab session. Clearing session storage or closing the tab can lose the identity; secrets are not recoverable from the database. Token rotation/revocation still need a defined implementation.
+- Browser room refresh currently polls the authenticated snapshot RPC every three seconds; it does not use Supabase Realtime. It sends participant heartbeats every 60 seconds. The scheduled host-disconnect fallback and room cleanup are still not enabled.
+
+## Web MVP setup and test flow
+
+The web app selects the RPC-backed shared-room flow when both `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` are configured. If either is missing, it intentionally uses the original local-only prototype.
+
+1. Install Node.js 22+, pnpm 10, Docker, and the Supabase CLI.
+2. From the repository root, start the local stack and reset it to the current migrations:
+
+   ```sh
+   supabase start -x studio,inbucket,edge-runtime,logflare,vector
+   supabase db reset --local
+   supabase status
+   ```
+
+3. Copy `.env.example` to `.env.local`. Set `VITE_SUPABASE_URL` to the local API URL and `VITE_SUPABASE_PUBLISHABLE_KEY` to the local anon/publishable key printed by `supabase status`. These are public browser credentials; never use the service-role key.
+4. Install dependencies and start the app:
+
+   ```sh
+   pnpm install
+   pnpm dev
+   ```
+
+5. Open the local web URL in two separate browser sessions. In session A, create a room and add at least two options. Copy the room code. In session B, join using that code, add options if contribution is open, and vote. Test both Yup and Nah, the host's early-end one-minute grace, and tie resolution.
+6. Run `pnpm build` and `supabase test db --local` for the production build and database assertions.
+
+Participant identity is stored in tab-scoped `sessionStorage`; keep the tab open during a test. The room code alone cannot read room data. The MVP uses polling rather than Realtime and is intended for local testing, not public launch. Stop the disposable stack with `supabase stop` when finished.
 
 ## Local database verification
 
