@@ -1,6 +1,6 @@
 begin;
 
-select plan(12);
+select plan(14);
 
 select has_table('public', 'rooms', 'rooms table exists');
 select has_table('public', 'participants', 'participants table exists');
@@ -38,6 +38,18 @@ select ok(
   'a valid room-scoped secret can read its room snapshot'
 );
 
+select throws_ok(
+  format(
+    'select public.get_room_snapshot(%L, %L::uuid, %L)',
+    (select payload->>'room_code' from test_host),
+    (select payload->>'participant_id' from test_host),
+    repeat('0', 64)
+  ),
+  '28000',
+  'Invalid room-scoped identity',
+  'an incorrect participant secret cannot read the room snapshot'
+);
+
 create temporary table test_cards (payload jsonb);
 
 insert into test_cards
@@ -54,6 +66,18 @@ select public.add_card(
   ((select payload->>'participant_id' from test_guest)::uuid),
   (select payload->>'participant_secret' from test_guest),
   '{"name":"Taco place"}'::jsonb
+);
+
+select throws_ok(
+  format(
+    'select public.start_voting(%L, %L::uuid, %L)',
+    (select payload->>'room_code' from test_guest),
+    (select payload->>'participant_id' from test_guest),
+    (select payload->>'participant_secret' from test_guest)
+  ),
+  '42501',
+  'Only the host can start voting',
+  'a guest cannot start the voting round'
 );
 
 create temporary table test_round as
