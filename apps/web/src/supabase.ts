@@ -9,7 +9,7 @@ type RpcErrorPayload = { message?: string; details?: string; hint?: string; code
 export class BackendError extends Error {
   constructor(message: string, readonly code?: string) { super(message); this.name = "BackendError"; }
 }
-export function createBackend(url: string, publishableKey: string, fetcher: typeof fetch = fetch) {
+export function createBackend(url: string = "", publishableKey: string = "", fetcher: typeof fetch = fetch) {
   const base = url.replace(/\/+$/, "");
   async function rpc<T>(name: string, args: Record<string, unknown> = {}): Promise<T> {
     let response: Response;
