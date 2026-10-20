@@ -19,15 +19,6 @@
   --wafflr-color-mint: #cde8d4;
   --wafflr-color-danger: #b9473e;
   --wafflr-color-danger-soft: #fde8e4;
-  --wafflr-color-ink: #30251f;
-  --wafflr-color-ink-soft: #74655a;
-  --wafflr-color-ink-muted: #958477;
-  --wafflr-color-paper: #fff8ed;
-  --wafflr-color-line: #eadcc8;
-  --wafflr-color-line-strong: #d8c4aa;
-  --wafflr-color-coral: #df804e;
-  --wafflr-color-coral-soft: #f9e6d7;
-  --wafflr-color-mint-strong: #3d7653;
   --wafflr-radius-sm: 0.75rem;
   --wafflr-radius-md: 1rem;
   --wafflr-radius-lg: 1.5rem;
@@ -50,6 +41,15 @@
   --wafflr-motion-normal: 220ms;
   --wafflr-motion-slow: 420ms;
   --wafflr-content-width: 72rem;
+  --wafflr-color-ink: var(--wafflr-color-text-primary);
+  --wafflr-color-ink-soft: var(--wafflr-color-text-secondary);
+  --wafflr-color-ink-muted: var(--wafflr-color-text-muted);
+  --wafflr-color-paper: var(--wafflr-color-page-background);
+  --wafflr-color-line: var(--wafflr-color-border);
+  --wafflr-color-line-strong: var(--wafflr-color-border-strong);
+  --wafflr-color-coral: var(--wafflr-color-accent-primary);
+  --wafflr-color-coral-soft: var(--wafflr-color-accent-soft);
+  --wafflr-color-mint-strong: var(--wafflr-color-positive);
 }
 
 @theme inline {

@@ -45,6 +45,23 @@ function renderCss(source) {
       if (group === 'layout') lines.push(`  --wafflr-${kebab(name)}: ${value};`);
     }
   }
+
+  // Compatibility names point to semantic tokens; values are never duplicated.
+  const legacyColorAliases = {
+    ink: 'textPrimary',
+    inkSoft: 'textSecondary',
+    inkMuted: 'textMuted',
+    paper: 'pageBackground',
+    line: 'border',
+    lineStrong: 'borderStrong',
+    coral: 'accentPrimary',
+    coralSoft: 'accentSoft',
+    mintStrong: 'positive',
+  };
+  for (const [alias, canonical] of Object.entries(legacyColorAliases)) {
+    lines.push(`  --wafflr-color-${kebab(alias)}: var(--wafflr-color-${kebab(canonical)});`);
+  }
+
   lines.push(
     '}',
     '',

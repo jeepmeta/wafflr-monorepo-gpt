@@ -19,16 +19,7 @@ export const tokens = {
     "positiveSoft": "#e3f3e7",
     "mint": "#cde8d4",
     "danger": "#b9473e",
-    "dangerSoft": "#fde8e4",
-    "ink": "#30251f",
-    "inkSoft": "#74655a",
-    "inkMuted": "#958477",
-    "paper": "#fff8ed",
-    "line": "#eadcc8",
-    "lineStrong": "#d8c4aa",
-    "coral": "#df804e",
-    "coralSoft": "#f9e6d7",
-    "mintStrong": "#3d7653"
+    "dangerSoft": "#fde8e4"
   },
   "radius": {
     "sm": "0.75rem",
