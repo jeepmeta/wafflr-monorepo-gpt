@@ -178,3 +178,6 @@ button:disabled { cursor:not-allowed; }
   .ballot-review-copy { flex-basis:calc(100% - 3.5rem); }
   .ballot-review-row .wf-button { margin-left:auto; }
 }
+
+.room-title-field { max-width:38rem; margin:1rem 0 2rem; }
+.room-title-field .field-note { display:block; margin-top:.45rem; }
