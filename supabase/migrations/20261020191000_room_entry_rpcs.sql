@@ -19,6 +19,7 @@ declare
   v_room_code text;
   v_identity_secret text;
   v_identity_hash text;
+  v_alphabet constant text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   v_attempt integer := 0;
 begin
   if p_title is null or pg_catalog.char_length(pg_catalog.btrim(p_title)) not between 1 and 80 then
@@ -35,8 +36,8 @@ begin
     raise exception using errcode = '22023', message = 'Invalid contribution quota';
   end if;
 
-  v_identity_secret := pg_catalog.replace(pg_catalog.gen_random_uuid()::text, '-', '') || pg_catalog.replace(pg_catalog.gen_random_uuid()::text, '-', '');
-  v_identity_hash := pg_catalog.encode(pg_catalog.sha256(pg_catalog.convert_to(v_identity_secret, 'UTF8')), 'hex');
+  v_identity_secret := pg_catalog.encode(extensions.gen_random_bytes(32), 'hex');
+  v_identity_hash := pg_catalog.encode(extensions.digest(pg_catalog.convert_to(v_identity_secret, 'UTF8'), 'sha256'), 'hex');
 
   loop
     v_attempt := v_attempt + 1;
@@ -105,8 +106,8 @@ begin
     raise exception using errcode = 'P0002', message = 'Room not found or no longer available';
   end if;
 
-  v_identity_secret := pg_catalog.replace(pg_catalog.gen_random_uuid()::text, '-', '') || pg_catalog.replace(pg_catalog.gen_random_uuid()::text, '-', '');
-  v_identity_hash := pg_catalog.encode(pg_catalog.sha256(pg_catalog.convert_to(v_identity_secret, 'UTF8')), 'hex');
+  v_identity_secret := pg_catalog.encode(extensions.gen_random_bytes(32), 'hex');
+  v_identity_hash := pg_catalog.encode(extensions.digest(pg_catalog.convert_to(v_identity_secret, 'UTF8'), 'sha256'), 'hex');
 
   insert into public.participants (room_id, role, identity_secret_hash)
   values (v_room.id, 'guest', v_identity_hash)
@@ -159,7 +160,7 @@ begin
     from public.participants
     where room_id = v_room.id
       and id = p_participant_id
-      and identity_secret_hash = pg_catalog.encode(pg_catalog.sha256(pg_catalog.convert_to(p_participant_secret, 'UTF8')), 'hex');
+      and identity_secret_hash = pg_catalog.encode(extensions.digest(pg_catalog.convert_to(p_participant_secret, 'UTF8'), 'sha256'), 'hex');
 
   if not found then
     raise exception using errcode = '28000', message = 'Invalid room-scoped identity';
