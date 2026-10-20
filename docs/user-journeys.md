@@ -1,58 +1,54 @@
-# User Journeys and Room Lifecycle
+# User Journeys and Lifecycle
 
-## Core rule: one shared game
+## Room contract
 
-A room is one shared decision, not separate host and guest experiences. Everyone sees the same cards and current phase. The creator is a participant first; creator powers are deliberately limited to three: veto cards before voting, end voting early if the game is stuck or delayed, and select a winner if a tie persists after the tie-breaker round.
+- One room represents one decision.
+- Categories: `eat`, `watch`, `do`, `custom`.
+- Creator and guests share the same deck and room phase.
+- Joining requires a room code or QR scan from Home. QR encodes the code only; no deep links.
+- Joining requires no signup, email, nickname, or app install. Do not show participant identities; show aggregate counts only.
 
-## High-level flow
+## Host journey
 
-Create room → choose whether to create all cards or invite contributions → collect and review cards → lock deck and vote → resolve any tie → show winner → close room.
+1. Home → Create Room.
+2. Select category; preset categories use a fixed icon. Custom lets the host set a title and choose an icon.
+3. Set room title and contribution mode: host creates all cards, or guests contribute.
+4. In guest-contribution mode, choose 1, 2, or 3 cards per guest. The host is also a contributor.
+5. Build cards or wait for submissions. At least two cards are required to vote; maximum 100 cards per room.
+6. Review the shared responsive card grid. Use the existing card editor for edits; remove/veto unwanted cards. Review remains live until voting starts.
+7. Start voting. Freeze the deck atomically, announce the start, and use a brief synchronized countdown.
+8. End voting normally or end early with a one-minute grace countdown. Resolve the result and any tie.
+9. Show winner or tie result, then close the room. Retain the closed room for 24 hours, then delete its operational data.
 
-The creator chooses one of two setup paths:
+## Guest journey
 
-- **Create all cards:** the creator builds the deck and then opens voting.
-- **Invite guests to create cards:** guests contribute under the same card-submission rules as the creator; the creator contributes cards too. The creator can veto cards during final review, but cannot otherwise manage participants.
+1. Home → Join Room → enter code or scan QR.
+2. Show a short branded room intro, then open the current phase. Do not reveal the host's identity.
+3. If contributions are enabled, submit up to the room's 1–3 card quota. Contributors can edit/delete their own cards until voting starts.
+4. Use **I'm Done** at any time. Unused slots are skipped; they never become blank cards.
+5. Wait while the host reviews or starts voting. New submissions/edits are accepted live through review until voting starts.
+6. During voting, choose Yep or Nah for every eligible card, review the ballot, and confirm submission.
+7. Wait for the outcome. A participant who joins after a round has started cannot vote in that round; wait for the next round or result.
 
-## Create room journey
+## Live review and cutoff
 
-**Home Screen:**
+- Accept submissions and edits in real time during host review until voting begins.
+- Host review uses a responsive grid with edit/remove controls and the existing card editor with Save/Cancel.
+- The host can start even if a contributor has unused slots or has not pressed I'm Done.
+- If the host begins the cutoff while contributors are unfinished, show a one-minute grace countdown and notify them. Keep contribution open during the grace period; preserve the current deck and never create blank cards from unused slots.
+- At voting start, atomically lock the deck and reject stale edits/submissions.
 
-- User selects Create Room.
+## Voting, reconnect, and resuming
 
-**
-Guests join by entering the room code or scanning the QR code from the Home screen. Everyone shares one room state. The room represents one decision only.
+- Voting start is synchronized across clients with a brief countdown.
+- Voters can revisit cards and change responses before final confirmation. Submission is final for that round.
+- Refresh/rejoin restores the authoritative room phase and the participant's current progress; do not create duplicate rooms or ballots.
+- Late joiners wait until the next round or results and cannot change the active round's eligible deck.
+- If the creator disconnects during voting or a tie-breaker, retain the room state. Reconnection within 10 minutes restores control. After 10 minutes, automatically resolve from submitted ballots; if no ballots were submitted, use the documented fallback for the active round.
+- Show clear loading, offline, stale-room, expired-room, and retry states. Preserve drafts where safe.
 
-**Collect cards:** The creator may choose to create the whole deck or allow guest submissions. When guest submissions are enabled, the creator is also a card contributor. Guests may submit within the chosen per-guest limit and can edit or delete their own cards until voting starts. A room-wide cap of 100 cards applies across everyone. At 100/100, new submissions are disabled and the room shows “Room full — 100/100 cards.”
+## Phases
 
-**Finish contributing:** Guests can press “I’m Done” even with unused slots; unused slots are skipped. This does not prevent the creator from moving forward.
+`setup` → `collecting` (optional) → `reviewing` → `voting` → `tie-breaker` (if needed) → `winner` or `tie-result` → `closed`.
 
-**Review and veto:** The creator reviews the shared deck in a responsive grid and can veto/remove cards before voting starts. Contributors can edit or delete their own cards during review; the creator does not edit other contributors' cards. New submissions and edits remain live during review. The creator’s veto power applies before voting starts. The creator can start voting at any time once at least two cards exist, even if guests have unused slots or have not pressed “I’m Done.”
-
-**Start voting:** Starting voting locks the deck and closes submissions. The room announces the start, shows a brief synchronized countdown, and then all eligible participants enter the voting experience. A late joiner after voting starts is view-only.
-
-**Vote:** Swipe right or tap “Yup” to approve; swipe left or tap “Nah” to reject. Participants must choose Yup or Nah for every card before submitting. They can revisit cards and change choices until pressing “Submit Votes.” After submission, the ballot is final. The waiting message is “Votes submitted! Waiting for everyone else…”
-
-**Resolve results:** The card with the highest count of submitted Yup votes wins; Nah votes do not subtract from Yup votes. Only submitted ballots count. The creator may end voting at any time, including before submitting their own ballot. If zero ballots have been submitted, the creator selects a winner from the available cards. If multiple cards tie for the most Yup votes, run one tie-breaker round with only the tied cards. If the tie persists, the creator selects one of the tied cards side by side to declare the winner.
-
-**Winner and closure:** Show only the winning card, Butters celebrating, and confetti; do not reveal vote totals or losing-card details. After a short celebration, the room closes automatically. The Winner screen remains available to anyone who opens the room for 24 hours after closure, then room and decision data are permanently deleted.
-
-## Creator disconnect
-
-The room continues with the original creator role retained. Guests can continue voting and submitting ballots, but only the creator can start or end phases when connected. Guests are not shown a creator-disconnect notice or countdown. If the creator reconnects within 10 minutes, control is restored immediately. After 10 minutes disconnected during voting or a tie-breaker, the phase ends automatically using submitted ballots; if none have been submitted, choose a random winner from the relevant available cards.
-
-## Shared-state and integrity rules
-
-- Every participant sees the same authoritative room phase and deck.
-- The creator is not a general administrator; only the three powers listed above are special creator powers.
-- New submissions and edits are accepted during review and stop when voting starts.
-- Starting voting atomically locks the active deck; stale clients cannot mutate it.
-- Creator actions and participant actions must be reflected in the same shared room state.
-- Re-entry restores the current phase, available controls, and progress rather than restarting the game.
-
-## Conceptual phases
-
-Setup → Collecting (if enabled) → Reviewing → Voting → Tie-breaker (only if needed) → Winner → Closed. A room is for one decision; there is no second decision in the same room.
-
-## Navigation and recovery
-
-Back, refresh, and rejoin must not create duplicate rooms or bypass the current phase. Show concise loading, disconnected, stale-room, and error states. Prefer preserving work and giving one clear recovery action over adding extra management steps.
+Phase names are domain concepts; UI screens need not map one-to-one to phases.

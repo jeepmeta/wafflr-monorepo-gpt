@@ -1,23 +1,29 @@
-# Wafflr Documentation
+# Wafflr Docs
 
-This directory is the maintained product and technical reference for Wafflr. It records decisions before implementation so the product can be built consistently and the docs can evolve alongside it.
+## Product contract
 
-## Documents
+- Product: **Wafflr**, a playful group decision tool.
+- MVP categories: `eat` (Where to Eat), `watch` (What to Watch), `do` (What to Do), `custom`.
+- Shared engine: one room, card deck, contribution, voting, tally, and result model for every category.
+- Delivery: responsive React web app/PWA first. Expo/React Native is a future client; `apps/mobile` remains a placeholder.
+- Backend: Supabase is selected but not connected. Do not imply persistence, realtime, or production security is already implemented.
 
-- [Development setup](./development-setup.md): local prerequisites, common commands, environment-variable safety, and working agreements.
-- [Backend plan](./backend-plan.md): planned Supabase responsibilities, security invariants, conceptual data model, retention, and implementation sequence.
-- [Official technical references](./references/README.md): official documentation links for the stack.
-- [Product vision and scope](./product-vision.md): purpose, users, principles, initial release, and future direction.
-- [User journeys and lifecycle](./user-journeys.md): host and guest journeys, room phases, resuming rooms, and live-review behavior.
-- [Screen catalog](./screen-catalog.md): intended screens, responsibilities, controls, and states.
-- [UX decision catalog](./ux-decision-catalog.md): explicit UX selections recorded for Decisions 19–32, including room recovery, identity, card limits, guest submissions, review, and deck locking. Decisions 1–18 need to be recovered from their original record rather than guessed.
-- [Decision engine](./decision-engine.md): deck construction, voting semantics, tallying, ties, and rules needing decisions.
-- [Brand and characters](./brand-and-characters.md): Wafflr voice, Butters, food-character direction, and asset guidance.
-- [Architecture](./architecture.md): monorepo boundaries, domain concepts, synchronization, and platform strategy.
-- [Decision log](./decision-log.md): consolidated confirmed decisions, open questions, and a template for future changes.
+## Source-of-truth documents
 
-## How to use these docs
+| File | Contract |
+|---|---|
+| [Development setup](./development-setup.md) | Local environment, commands, safe configuration, working agreements |
+| [Backend plan](./backend-plan.md) | Supabase responsibilities, security, conceptual data, retention, sequence |
+| [Official technical references](./references/README.md) | Official stack documentation |
+| [User journeys](./user-journeys.md) | Host/guest flow, lifecycle, re-entry, synchronization |
+| [Screen catalog](./screen-catalog.md) | Screen responsibilities, controls, states |
+| [Decision engine](./decision-engine.md) | Category-neutral domain and voting rules |
+| [Brand and characters](./brand-and-characters.md) | Voice, Butters, food characters, asset guidance |
+| [Architecture](./architecture.md) | Workspace boundaries, tokens, platforms, sync |
 
-Treat statements as Confirmed, Proposed, or Open. Do not silently turn a proposal into product behavior. When implementation reveals a mismatch, update the relevant doc in the same change as the code. When a product decision changes behavior, record it in the decision log and update affected flows, screens, and engine rules. Use the UX decision catalog for the detailed rationale/selection record and the decision log for the current concise state.
+## Change rules
 
-For coding-agent instructions, start with the repository root `AGENTS.md` and use the relevant skill under `.agents/skills/`. Skills guide a workflow; product decisions in these docs remain authoritative.
+- Keep these documents concise and consistent. Update the relevant document when confirmed behavior changes.
+- Distinguish **confirmed**, **planned**, and **open** decisions; do not silently invent product behavior.
+- Code may be incomplete even when a behavior is specified. Check implementation and tests before claiming a feature works.
+- `AGENTS.md` and skills under `.agents/skills/` provide agent workflow instructions; this directory contains the product/technical contract.

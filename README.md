@@ -4,7 +4,7 @@ Wafflr is a gamified group decision-making experience. This repository is a pnpm
 
 ## Product documentation
 
-Before implementation, review the [Wafflr documentation hub](./docs/README.md). It links the product vision, host and guest journeys, screen catalog, decision engine, brand and character guide, architecture, and decision log. These docs distinguish confirmed decisions from proposals and open questions.
+Before implementation, review the [Wafflr documentation hub](./docs/README.md). It links the current development, backend, journey, screen, decision-engine, brand, architecture, and official-reference contracts.
 
 ## Stack
 
@@ -58,7 +58,7 @@ pnpm tokens:check    # Check generated token files are current
 
 Edit `packages/config/tokens.source.json` to change design values, then run `pnpm tokens:generate`. Do not edit generated token files directly. Semantic tokens and Tailwind v4 mappings are defined in the generated CSS; old token aliases remain while existing prototype styles are migrated.
 
-Keep domain logic in packages/core free of browser and React Native APIs. Keep web-specific code in apps/web. The current room flow is a local prototype; multi-device room synchronization, QR generation/scanning, persistence, and server-authoritative voting are not connected yet. Supabase is the planned backend; see [backend plan](./docs/backend-plan.md). When mobile development begins, initialize Expo in apps/mobile and share only platform-neutral logic and components that are genuinely cross-platform.
+Keep domain logic in packages/core free of browser and React Native APIs. Keep web-specific code in apps/web. The current room flow is a prototype; multi-device room synchronization, QR generation/scanning, persistence, and server-authoritative voting are not connected yet. Supabase is the planned backend; see [backend plan](./docs/backend-plan.md). When mobile development begins, initialize Expo in apps/mobile and share only platform-neutral logic and components that are genuinely cross-platform.
 
 ## AI coding agents
 

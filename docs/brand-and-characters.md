@@ -1,37 +1,32 @@
 # Brand and Characters
 
-## Name and personality
+## Brand
 
-Use **Wafflr** (W-A-F-F-L-R) consistently; do not silently rename it to “Waffler.” The brand should feel warm, encouraging, energetic, cute, polished, and a little silly without becoming noisy or condescending. The product should reduce pressure, not shame people for indecision.
+- Name: **Wafflr** (W-A-F-F-L-R). Never silently rename to Waffler.
+- Purpose: reduce decision fatigue and anxiety; make choosing together feel light and easy.
+- Voice: warm, encouraging, playful, concise, never shaming or pressuring.
+- Copy pattern: state what happened, give one clear next action, use humor only when it improves clarity.
+- Visual direction: cute, polished, energetic, candy-bright accents balanced with warm waffle/butter/syrup tones; tactile, bouncy interactions without visual clutter.
+- Typography exploration: Fredoka for display and JetBrains Mono for small technical/count labels. Treat final font loading and type scale as implementation details to verify.
 
-## Butters: primary mascot
+## Butters
 
-Butters is the named cute waffle mascot. The desired direction is app-like, with fun animations. Butters can eventually welcome users, explain a next step, represent a waiting state, or celebrate a result. Those placements are suggestions; exact poses, copy, and triggers are not yet approved.
-
-The future character spec should define canonical silhouette, waffle-grid treatment, face/expressions, approved palette and outlines, proportions at small sizes, animation states, source file location, export rules, and reduced-motion alternatives. Do not invent canonical colors, exact anatomy, catchphrases, or timing before they are selected.
+- Butters is the primary cute waffle mascot.
+- Intended roles: welcome, explain the next step, reassure during waiting, and celebrate a finalized outcome.
+- Do not invent canonical anatomy, palette, catchphrases, or animation timing. Use approved source artwork when available.
+- Animation must not block the task or imply an action succeeded before confirmation.
 
 ## Food-character family
 
-Character exploration includes playfully cute food characters, eye-popping colors, and transparent/alpha backgrounds. The style direction includes arms and legs that match each character’s colors and unique tennis shoes for each character.
+- Cute food characters with vivid, distinct palettes, matching-color arms/legs, and unique tennis shoes.
+- Prefer transparent backgrounds for reusable character art.
+- Eggin Targaryen is the fried-egg character used for tie-breaker moments.
+- Keep characters recognizable at small sizes and visually consistent as a family.
 
-Keep the family visually coherent while ensuring each character is recognizable at small sizes. For every approved character, eventually record name, silhouette, palette, expressions, poses, source asset, exports, UI use, and contrast notes. Final names and roster remain open.
+## Assets and motion
 
-## Art direction
-
-- Cute, playful, polished, and app-friendly.
-- Bright, high-impact color where it improves recognition.
-- Transparent backgrounds for reusable character assets.
-- SVG is a good source format for scalable mascots; use raster exports when delivery requires them.
-- Essential text and controls must remain readable against artwork.
-- Animations should be brief and never block the user.
-- Respect reduced-motion preferences.
-
-Exact colors, typography, logo lockups, spacing, animation library, and asset naming conventions remain open.
-
-## Character behavior and tone
-
-Animation should reinforce state: welcome, waiting, participating, celebrating, or acknowledging a tie. Never imply a vote was recorded if it failed or celebrate a winner before the result is final. Plain-language instructions come first; personality supports clarity.
-
-## Asset governance
-
-Keep editable source artwork separate from production exports. Track licenses and provenance for third-party assets. Establish a shared asset library and naming conventions when the roster and app packages are ready.
+- Keep editable source files separate from optimized exports; prefer SVG for scalable simple artwork and raster exports where appropriate.
+- Record asset provenance/licensing for third-party material.
+- Use lightweight animation, provide reduced-motion alternatives, and never make essential information depend on color or motion.
+- Placeholder artwork is acceptable until approved production assets are ready.
+- Exact logo lockups, final palette, spacing scale, asset naming, and animation library remain open.

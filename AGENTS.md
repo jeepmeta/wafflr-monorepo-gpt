@@ -6,7 +6,7 @@ Read this file before making repository changes. For product behavior, start at 
 
 - Wafflr is a group decision-making product. MVP categories are `eat`, `watch`, `do`, and `custom`.
 - All categories use one room, card/deck, contribution, voting, tally, and tie-resolution engine. Category differences belong in data/configuration and presentation, not duplicated voting logic.
-- Treat product documentation as the source of truth. Preserve the distinction between Confirmed, Proposed, and Open decisions; do not invent behavior to fill gaps.
+- Treat product documentation as the source of truth. Treat the approved docs as the product/technical contract; distinguish confirmed behavior from open questions and do not invent behavior to fill gaps.
 - The creator has only the extra permissions documented in `docs/decision-engine.md`. Enforce important permissions and state transitions in the authoritative backend once connected.
 
 ## Architecture
@@ -39,7 +39,7 @@ Read this file before making repository changes. For product behavior, start at 
 ## Required workflow
 
 1. Read relevant docs and skill instructions before changing behavior.
-2. Make the smallest coherent change; update docs and decision log when product behavior or architecture changes.
+2. Make the smallest coherent change; update the relevant approved document(s) when product behavior or architecture changes.
 3. Add or update tests for logic and important user flows.
 4. Run the applicable checks: `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm build`, and relevant tests.
 5. Report checks actually run and any checks blocked by missing dependencies or secrets. Never claim a build/test passed if it was not run.

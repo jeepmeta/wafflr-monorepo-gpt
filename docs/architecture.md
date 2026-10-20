@@ -1,53 +1,44 @@
-# Architecture and Domain Model
+# Architecture
 
-## Repository direction
+## Stack and delivery
 
-Repository: [jeepmeta/wafflr-monorepo-gpt](https://github.com/jeepmeta/wafflr-monorepo-gpt). The intent is web/PWA first with mobile later.
+- Package management: pnpm workspaces.
+- Task orchestration: Turborepo.
+- Language: TypeScript.
+- Web: React + Vite, Tailwind CSS v4, Vite PWA support.
+- Backend: Supabase (Postgres, Realtime, trusted database/server operations); selected, not yet connected.
+- Mobile: future Expo + React Native, with NativeWind to be evaluated at implementation time. `apps/mobile` is currently a placeholder.
+- Hosting/domain: not selected.
 
-Chosen stack: pnpm workspaces, Turborepo, TypeScript, React + Vite, Tailwind CSS v4 via the Vite integration, Vite PWA support, and a future Expo / React Native client. The starter README describes apps/web, apps/mobile, packages/core, packages/ui, and packages/config. Mobile and some shared packages are placeholders until implemented.
+## Workspace boundaries
 
-## Package boundaries
+| Path | Responsibility | Constraints |
+|---|---|---|
+| `apps/web` | Browser UI, routes, PWA, browser integrations | No authoritative domain rules in components |
+| `apps/mobile` | Future native client | Do not build until explicitly scheduled; reuse domain rules |
+| `packages/core` | Room phases, permissions, cards, ballots, tally/tie rules | Platform-neutral; no React/DOM/browser/native imports |
+| `packages/ui` | Reusable React UI primitives and mascot component/styles | Keep primitives genuinely reusable; don't put domain policy here |
+| `packages/config` | Design-token source, generated CSS/TypeScript, shared tooling | Edit source only; regenerate outputs |
 
-**apps/web:** browser routes, responsive screens, PWA integration, browser-specific behavior.
-**apps/mobile:** future Expo / React Native client; reuse core domain rules rather than copying them.
-**packages/core:** platform-neutral domain types, validation, lifecycle rules, deck snapshots, voting policy, tallying, and tie detection once finalized. No React, DOM, browser storage, or React Native imports.
-**packages/ui:** genuinely reusable UI where a cross-platform strategy makes sense. Do not force web-only components into it.
-**packages/config:** the canonical design-token source, generated CSS/TypeScript values, and semantic Tailwind CSS v4 theme aliases. Do not hand-edit generated token outputs.
+## Design tokens
 
-## Suggested domain entities
+- Canonical source: `packages/config/tokens.source.json`.
+- Generated outputs: `packages/config/src/tokens.css` and `packages/config/src/tokens.ts`.
+- Run `pnpm tokens:generate` after source edits and `pnpm tokens:check` in verification.
+- Tailwind v4 semantic aliases are generated in CSS. Prefer tokens by meaning (page, surface, primary action/text) over raw values.
+- A single canonical token change must update every consumer of that semantic role. Do not maintain duplicate values in component styles.
+- NativeWind compatibility is a future validation task; shared token values do not mean browser CSS works unchanged in React Native.
 
-These are conceptual, not finalized TypeScript definitions:
+## Domain and synchronization
 
-- DecisionRoom: room ID, category, phase, host reference, options, participants, round metadata.
-- DecisionCategory: category identity, labels, option schema, card presentation configuration.
-- DecisionOption: stable ID, category-specific fields, submitter/reference, timestamps, and edit state as needed.
-- Participant: stable room-scoped identity and role, with privacy-conscious profile fields.
-- VotingRound: round ID, frozen deck/order, status, result.
-- Vote: participant and option references, response, timestamps/idempotency metadata as needed.
-- RoomEvent: conceptual changes such as joining, option submit/edit/remove, guest completion, phase transition, or vote recording.
+- One category-neutral engine handles `eat`, `watch`, `do`, and `custom`.
+- Supabase is intended to become the authoritative shared-state layer. Realtime distributes changes; trusted operations enforce permissions, phase changes, atomic deck lock, ballots, ties, and expiry.
+- During collection/review, accepted edits/submissions appear live. Starting voting freezes the eligible deck. All clients must restore the current phase after refresh/rejoin.
+- Room codes locate rooms; they do not authorize mutations. RLS and trusted operations enforce access.
+- Do not implement security-sensitive rules solely in the client.
 
-Do not finalize structures before deciding identity, persistence, realtime transport, and voting policy.
+## Conceptual domain
 
-## Shared state and synchronization
+`Room`, `Participant`, `Card`, `Contribution`, `VotingRound`, `Ballot`, `BallotResponse`, `RoundResult`, `RoomExpiry`.
 
-The host and guests need a consistent view of submissions and phase. During collection/review, changes are live. At voting start, the active deck is frozen. The authoritative state layer must enforce phase rules; client-side checks alone are not sufficient.
-
-Supabase is the selected backend platform for Postgres persistence and realtime delivery. The project, schema, authorization model, migrations, and hosting provider are not configured yet. Keep domain policy in `packages/core` and enforce sensitive operations at a trusted server/database boundary. Separate domain policy (what is valid), application orchestration (which operation runs), persistence/synchronization (how state is stored and delivered), and presentation (what each screen renders).
-
-## Conceptual events
-
-Room creation, participant join, option submit/update/remove, guest completion, review entry, vote start, and vote recording are useful event concepts. Vote start should establish the exact deck snapshot for that round. These are not committed event names and do not require event sourcing.
-
-## PWA and mobile
-
-Build and validate responsive web/PWA first. Keep decision rules platform-neutral so Expo can reuse them. Share types and logic when stable; share UI only when platform differences permit a clean abstraction.
-
-Define PWA installability, icons, offline fallback, update behavior, and what happens when a room needs a live connection. Do not pretend shared live voting works offline if state cannot synchronize.
-
-## Security and privacy
-
-Room codes help locate a room but are not authorization credentials. Supabase RLS and trusted functions must enforce access and state transitions. Never commit secrets or expose service-role keys in browser code. Decide room-scoped identity, credential handling, vote privacy, and data retention before production. See `docs/backend-plan.md` for the current security baseline.
-
-## Quality strategy
-
-Unit-test core rules and tally outcomes; test review-to-voting lock; test live changes across clients; test responsive layout, keyboard and screen-reader operation; verify PWA install/update behavior; add mobile parity checks when Expo is initialized. Run pnpm install, pnpm typecheck, pnpm lint, and pnpm build in a real environment. Earlier starter setup did not yet have verified local install/build results.
+Exact database schema, hosting, category field schemas, and NativeWind version strategy remain open. See [backend plan](./backend-plan.md).
