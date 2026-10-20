@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, Check, ChevronRight, CircleHelp, Copy, Plus, Spa
 import { applyRoomAction, canStartVoting, createRoom, resolveCurrentRound, type DecisionCategory, type DecisionRoom, type VoteValue } from "@wafflr/core";
 import { Badge, Butters, Button, Card, EmptyState, SectionHeading, TextField } from "@wafflr/ui";
 
-type Screen = "home" | "join" | "setup" | "room" | "vote" | "tie" | "choose-winner" | "winner";
+type Screen = "home" | "join" | "setup" | "room" | "review" | "vote" | "ballot-review" | "tie" | "choose-winner" | "winner";
 type DraftCard = { title: string; category: string; location: string };
 const categories: { id: DecisionCategory; title: string; subtitle: string; icon: typeof Utensils }[] = [
   { id: "eat", title: "What to eat", subtitle: "Restaurants, snacks, the works", icon: Utensils },
@@ -21,6 +21,7 @@ export default function App() {
   const [quota, setQuota] = useState<1 | 2 | 3>(2);
   const [room, setRoom] = useState<DecisionRoom | null>(null);
   const [draft, setDraft] = useState<DraftCard>(blankCard());
+  const [editCardId, setEditCardId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [responses, setResponses] = useState<Record<string, VoteValue>>({});
   const [voteIndex, setVoteIndex] = useState(0);
@@ -47,14 +48,29 @@ export default function App() {
 
   function addCard() {
     if (!room) return;
-    if (contributionFull) { setError("You’ve added all your cards for this room."); return; }
     const title = draft.title.trim();
     if (!title) { setError("Give this option a name first."); return; }
+    if (editCardId) {
+      const result = applyRoomAction(room, { type: "update-own-card", cardId: editCardId, participantId: creatorId, patch: { title, category: draft.category.trim() || undefined, location: draft.location.trim() || undefined } });
+      if (!result.ok) { setError("Couldn’t update that option. Try again."); return; }
+      setRoom(result.room); setDraft(blankCard()); setEditCardId(null); setError(""); return;
+    }
+    if (contributionFull) { setError("You’ve added all your cards for this room."); return; }
     if (room.cards.length >= 100) { setError("Room full — 100/100 cards."); return; }
     const result = applyRoomAction(room, { type: "add-card", card: { id: newId(), title, category: draft.category.trim() || undefined, location: draft.location.trim() || undefined, submittedBy: creatorId, createdAt: Date.now() } });
     if (!result.ok) { setError(result.error === "card-limit-reached" ? "Room full — 100/100 cards." : result.error === "contribution-limit-reached" ? "You’ve added all your cards for this room." : "Couldn’t add that option. Try again."); return; }
     setRoom(result.room); setDraft(blankCard()); setError("");
   }
+
+  function editCard(cardId: string) {
+    const card = room?.cards.find((item) => item.id === cardId);
+    if (!card) return;
+    setDraft({ title: card.title, category: card.category ?? "", location: card.location ?? "" });
+    setEditCardId(card.id); setError(""); setScreen("room");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function cancelCardEdit() { setDraft(blankCard()); setEditCardId(null); setError(""); }
 
   function removeCard(cardId: string) {
     if (!room) return;
@@ -63,10 +79,15 @@ export default function App() {
   }
 
   function startVoting() {
+    if (!room || !canStartVoting(room)) { setError("Add at least two options before voting."); return; }
+    setError(""); setScreen("review");
+  }
+
+  function confirmStartVoting() {
     if (!room) return;
     const result = applyRoomAction(room, { type: "start-voting", participantId: creatorId });
-    if (!result.ok) { setError("Add at least two options before voting."); return; }
-    setRoom(result.room); setResponses({}); setVoteIndex(0); setScreen("vote");
+    if (!result.ok) { setError("Add at least two options before voting."); setScreen("room"); return; }
+    setRoom(result.room); setResponses({}); setVoteIndex(0); setScreen("vote"); setError("");
   }
 
   function setVote(cardId: string, value: VoteValue) {
@@ -149,24 +170,28 @@ export default function App() {
         <div className="workflow-footer"><span>Room limit: 100 cards total</span><Button size="lg" trailingIcon={<ArrowRight size={18} />} onClick={createNewRoom}>Create room</Button></div>
       </section>}
 
+      {screen === "review" && room && <section className="workflow-screen deck-review-screen"><Button variant="quiet" leadingIcon={<ArrowLeft size={17} />} onClick={() => setScreen("room")}>Back to deck</Button><SectionHeading eyebrow="FINAL DECK REVIEW" title="Looking good?" description="Give the deck one last look. You can edit or remove any option before the group starts voting." action={<Badge>{room.cards.length}/100 cards</Badge>} /><div className="review-card-grid">{room.cards.map((card, index) => <Card className="review-card" key={card.id}><div className="option-card-top"><span className="option-number">{String(index + 1).padStart(2, "0")}</span><div className="option-card-controls"><button className="remove-option" onClick={() => editCard(card.id)} aria-label={`Edit ${card.title}`} title="Edit this card"><span aria-hidden="true">✎</span></button><button className="remove-option" onClick={() => removeCard(card.id)} aria-label={`Remove ${card.title}`} title="Remove this card"><X size={16} /></button></div></div><div className="option-emoji">{category === "eat" ? ["🍕","🍜","🌮","🍔","🥗"][index % 5] : category === "watch" ? "🎬" : category === "do" ? "🎯" : "💡"}</div><h3>{card.title}</h3>{card.category && <span className="option-meta">{card.category}</span>}{card.location && <p className="option-location">{card.location}</p>}</Card>)}</div>{error && <p className="inline-error" role="alert">{error}</p>}<div className="workflow-footer sticky-footer"><span>{room.cards.length < 2 ? "Add at least two options before voting." : "Once voting starts, this deck is locked."}</span><div className="review-actions"><Button variant="secondary" onClick={() => setScreen("room")}>Add more options</Button><Button size="lg" trailingIcon={<ArrowRight size={18} />} disabled={!canStartVoting(room)} onClick={confirmStartVoting}>Lock deck & start voting</Button></div></div></section>}
+
       {screen === "room" && room && <section className="workflow-screen">
         <div className="room-topline"><Button variant="quiet" leadingIcon={<ArrowLeft size={17} />} onClick={() => setScreen("home")}>Home</Button><Badge tone="success">Room created</Badge></div>
         <div className="room-code-card"><div><span className="eyebrow">YOUR ROOM CODE</span><strong>{room.code}</strong><p>Share this code with your crew. QR sharing arrives with room sync.</p></div><Button variant="secondary" size="sm" leadingIcon={<Copy size={15} />} onClick={copyCode}>Copy code</Button></div>
         <SectionHeading eyebrow="BUILD THE DECK" title="What are the options?" description="Add the choices your group could be happy with. You can veto cards before voting starts." action={<Badge>{room.cards.length}/100 cards</Badge>} />
         <div className="add-card-panel">
           <div className="add-card-fields"><TextField label={category === "eat" ? "Restaurant or option name" : "Option name"} value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} placeholder={category === "eat" ? "e.g. Noodle House" : "e.g. Movie night"} onKeyDown={(event) => { if (event.key === "Enter") addCard(); }} /><div className="optional-fields">{category === "eat" && <TextField label="Cuisine / category" value={draft.category} onChange={(event) => setDraft({ ...draft, category: event.target.value })} placeholder="e.g. Thai" /> }<TextField label={category === "eat" ? "Location (optional)" : "Extra detail (optional)"} value={draft.location} onChange={(event) => setDraft({ ...draft, location: event.target.value })} placeholder={category === "eat" ? "Neighborhood or address" : "A little context"} /></div></div>
-          <Button leadingIcon={<Plus size={17} />} onClick={addCard} disabled={room.cards.length >= 100 || contributionFull}>Add option</Button>
+          <div className="add-card-actions"><Button leadingIcon={<Plus size={17} />} onClick={addCard} disabled={!editCardId && (room.cards.length >= 100 || contributionFull)}>{editCardId ? "Save changes" : "Add option"}</Button>{editCardId && <Button variant="quiet" onClick={cancelCardEdit}>Cancel</Button>}</div>
           {error && <p className="inline-error" role="alert">{error}</p>}
         </div>
-        {room.cards.length === 0 ? <EmptyState title="Your deck starts here" description="Add at least two options to unlock voting. No need to make this complicated." /> : <div className="option-grid">{room.cards.map((card, index) => <Card className="option-card" key={card.id}><div className="option-card-top"><span className="option-number">{String(index + 1).padStart(2, "0")}</span><button className="remove-option" onClick={() => removeCard(card.id)} aria-label={`Veto ${card.title}`} title="Veto this card"><X size={16} /></button></div><div className="option-emoji">{category === "eat" ? ["🍕","🍜","🌮","🍔","🥗"][index % 5] : category === "watch" ? "🎬" : category === "do" ? "🎯" : "💡"}</div><h3>{card.title}</h3>{card.category && <span className="option-meta">{card.category}</span>}{card.location && <p className="option-location">{card.location}</p>}</Card>)}</div>}
-        <div className="workflow-footer sticky-footer"><span>{room.contributionMode === "guests-contribute" ? `Your cards: ${myCardCount}/${room.cardLimitPerGuest} · ` : ""}{room.cards.length < 2 ? `Add ${2 - room.cards.length} more option${2 - room.cards.length === 1 ? "" : "s"} to start` : "Deck ready when you are"}</span><Button size="lg" trailingIcon={<ArrowRight size={18} />} disabled={!canStartVoting(room)} onClick={startVoting}>Start voting</Button></div>
+        {room.cards.length === 0 ? <EmptyState title="Your deck starts here" description="Add at least two options to unlock voting. No need to make this complicated." /> : <div className="option-grid">{room.cards.map((card, index) => <Card className="option-card" key={card.id}><div className="option-card-top"><span className="option-number">{String(index + 1).padStart(2, "0")}</span><div className="option-card-controls"><button className="remove-option" onClick={() => editCard(card.id)} aria-label={`Edit ${card.title}`} title="Edit this card"><span aria-hidden="true">✎</span></button><button className="remove-option" onClick={() => removeCard(card.id)} aria-label={`Remove ${card.title}`} title="Remove this card"><X size={16} /></button></div></div><div className="option-emoji">{category === "eat" ? ["🍕","🍜","🌮","🍔","🥗"][index % 5] : category === "watch" ? "🎬" : category === "do" ? "🎯" : "💡"}</div><h3>{card.title}</h3>{card.category && <span className="option-meta">{card.category}</span>}{card.location && <p className="option-location">{card.location}</p>}</Card>)}</div>}
+        <div className="workflow-footer sticky-footer"><span>{room.contributionMode === "guests-contribute" ? `Your cards: ${myCardCount}/${room.cardLimitPerGuest} · ` : ""}{room.cards.length < 2 ? `Add ${2 - room.cards.length} more option${2 - room.cards.length === 1 ? "" : "s"} to start` : "Deck ready when you are"}</span><Button size="lg" trailingIcon={<ArrowRight size={18} />} disabled={!canStartVoting(room)} onClick={startVoting}>Review deck & vote</Button></div>
       </section>}
+
+      {screen === "ballot-review" && room && <section className="workflow-screen ballot-review-screen"><Button variant="quiet" leadingIcon={<ArrowLeft size={17} />} onClick={() => setScreen(room.phase === "tie-breaker" ? "tie" : "vote")}>Back to voting</Button><div className="vote-intro"><Butters mood="thinking" size="md" /><h1>One last look.</h1><p>Make sure your Yup and Nah choices feel right. You can still change any answer before submitting.</p></div><div className="ballot-review-list">{activeCards.map((card, index) => <div className="ballot-review-row" key={card.id}><span className="ballot-review-emoji">{category === "eat" ? ["🍕","🍜","🌮","🍔","🥗"][room.cards.findIndex((item) => item.id === card.id) % 5] : category === "watch" ? "🎬" : category === "do" ? "🎯" : "💡"}</span><div className="ballot-review-copy"><strong>{card.title}</strong><span>{card.location || card.category || "Your choice"}</span></div><Badge tone={responses[card.id] === "yup" ? "success" : "danger"}>{responses[card.id] === "yup" ? "♥ Yup" : "✕ Nah"}</Badge><Button size="sm" variant="secondary" onClick={() => { setVoteIndex(index); setScreen(room.phase === "tie-breaker" ? "tie" : "vote"); }}>Change</Button></div>)}</div>{error && <p className="inline-error" role="alert">{error}</p>}<div className="workflow-footer"><span>{activeCards.length} answers · one submission</span><Button size="lg" onClick={submitVotes}>Confirm and submit votes <ArrowRight size={17} /></Button></div></section>}
 
       {(screen === "vote" || screen === "tie") && room && <section className="voting-screen">
         <div className="voting-top"><Badge tone="warning">{screen === "tie" ? "TIE-BREAKER" : "YOUR TURN"}</Badge><span>{Math.min(voteIndex + 1, activeCards.length)} of {activeCards.length}</span></div>
         <div className="vote-intro"><Butters mood="thinking" size="md" /><h1>{screen === "tie" ? "One more little round." : "Could you go for this?"}</h1><p>{screen === "tie" ? "Only the tied options. Let’s break it." : "A Yup says yes. A Nah says no. Trust your gut."}</p></div>
         {activeCards[voteIndex] ? <Card className="vote-card"><div className="vote-card-emoji">{category === "eat" ? ["🍕","🍜","🌮","🍔","🥗"][room.cards.findIndex((card) => card.id === activeCards[voteIndex].id) % 5] : category === "watch" ? "🎬" : category === "do" ? "🎯" : "💡"}</div><span className="eyebrow">OPTION {voteIndex + 1}</span><h2>{activeCards[voteIndex].title}</h2>{activeCards[voteIndex].category && <p>{activeCards[voteIndex].category}</p>}{activeCards[voteIndex].location && <p>{activeCards[voteIndex].location}</p>}<div className="vote-actions"><Button size="lg" variant="danger" onClick={() => setVote(activeCards[voteIndex].id, "nah")}>✕ Nah</Button><Button size="lg" onClick={() => setVote(activeCards[voteIndex].id, "yup")}>♥ Yup</Button></div></Card> : <EmptyState title="All caught up" description="Your choices are ready to submit." />}
-        <div className="voting-bottom"><div className="vote-navigation"><Button variant="quiet" size="sm" disabled={voteIndex === 0} onClick={() => setVoteIndex((index) => Math.max(0, index - 1))}>Previous card</Button><Button variant="quiet" size="sm" disabled={voteIndex >= activeCards.length - 1} onClick={() => setVoteIndex((index) => Math.min(activeCards.length - 1, index + 1))}>Next card</Button></div>{error && <p className="inline-error">{error}</p>}<Button fullWidth size="lg" disabled={activeCards.some((card) => !responses[card.id])} onClick={submitVotes}>Submit votes <ArrowRight size={17} /></Button><button className="text-action" onClick={() => { if (room) { const ended = applyRoomAction(room, { type: "creator-end-voting", participantId: creatorId }); if (ended.ok) { setRoom(ended.room); if (ended.room.phase === "tie-breaker") setScreen("choose-winner"); else if (ended.room.phase === "winner") setScreen("winner"); else setScreen("choose-winner"); } } }}>End voting early</button></div>
+        <div className="voting-bottom"><div className="vote-navigation"><Button variant="quiet" size="sm" disabled={voteIndex === 0} onClick={() => setVoteIndex((index) => Math.max(0, index - 1))}>Previous card</Button><Button variant="quiet" size="sm" disabled={voteIndex >= activeCards.length - 1} onClick={() => setVoteIndex((index) => Math.min(activeCards.length - 1, index + 1))}>Next card</Button></div>{error && <p className="inline-error">{error}</p>}<Button fullWidth size="lg" disabled={activeCards.some((card) => !responses[card.id])} onClick={() => { setError(""); setScreen("ballot-review"); }}>Review my votes <ArrowRight size={17} /></Button><button className="text-action" onClick={() => { if (room) { const ended = applyRoomAction(room, { type: "creator-end-voting", participantId: creatorId }); if (ended.ok) { setRoom(ended.room); if (ended.room.phase === "tie-breaker") setScreen("choose-winner"); else if (ended.room.phase === "winner") setScreen("winner"); else setScreen("choose-winner"); } } }}>End voting early</button></div>
       </section>}
 
       {screen === "choose-winner" && room && <section className="workflow-screen"><div className="vote-intro"><Butters mood="thinking" size="md" /><h1>{room.phase === "tie-breaker" ? "Still tied!" : "Let’s pick one."}</h1><p>{room.phase === "tie-breaker" ? "One last call. Tap the option that wins for your group." : "Voting ended before anyone submitted. Choose a card to keep things moving."}</p></div><div className="winner-choice-grid">{activeCards.map((card, index) => <button key={card.id} className="winner-choice" onClick={() => chooseWinner(card.id)}><span>{category === "eat" ? ["🍕","🍜","🌮","🍔","🥗"][index % 5] : category === "watch" ? "🎬" : category === "do" ? "🎯" : "💡"}</span><strong>{card.title}</strong><small>Choose winner <ArrowRight size={14} /></small></button>)}</div></section>}
