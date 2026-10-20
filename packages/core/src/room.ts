@@ -7,7 +7,7 @@ export interface DecisionCard { id: string; title: string; category?: string; lo
 export interface Ballot { participantId: string; responses: Record<string, VoteValue>; submittedAt: number }
 export interface RoundResult { winnerId?: string; tiedCardIds: string[]; yupCounts: Record<string, number> }
 export interface DecisionRoom {
-  id: string; code: string; creatorId: string; category: DecisionCategory; phase: RoomPhase;
+  id: string; code: string; title: string; creatorId: string; category: DecisionCategory; phase: RoomPhase;
   contributionMode: ContributionMode; cards: DecisionCard[]; cardLimitPerGuest: 1 | 2 | 3;
   guestCount: number; createdAt: number; closedAt?: number; expiresAt?: number; ballots: Ballot[];
   currentRound: number; tieBreakerCardIds?: string[]; winnerCardId?: string;
@@ -36,8 +36,8 @@ const activeCardIds = (room: DecisionRoom) => room.phase === "tie-breaker" && ro
 const countYup = (ballots: Ballot[], cardId: string) => ballots.reduce((count, ballot) => count + (ballot.responses[cardId] === "yup" ? 1 : 0), 0);
 function resolveWinner(room: DecisionRoom, winnerCardId: string): DecisionRoom { return { ...room, phase: "winner", winnerCardId, tieBreakerCardIds: undefined }; }
 
-export function createRoom(input: Pick<DecisionRoom, "id" | "code" | "creatorId" | "category" | "contributionMode" | "cardLimitPerGuest"> & { now: number }): DecisionRoom {
-  return { id: input.id, code: input.code, creatorId: input.creatorId, category: input.category, contributionMode: input.contributionMode, cardLimitPerGuest: input.cardLimitPerGuest, phase: input.contributionMode === "guests-contribute" ? "collecting" : "setup", cards: [], guestCount: 0, createdAt: input.now, ballots: [], currentRound: 1 };
+export function createRoom(input: Pick<DecisionRoom, "id" | "code" | "title" | "creatorId" | "category" | "contributionMode" | "cardLimitPerGuest"> & { now: number }): DecisionRoom {
+  return { id: input.id, code: input.code, title: input.title.trim(), creatorId: input.creatorId, category: input.category, contributionMode: input.contributionMode, cardLimitPerGuest: input.cardLimitPerGuest, phase: input.contributionMode === "guests-contribute" ? "collecting" : "setup", cards: [], guestCount: 0, createdAt: input.now, ballots: [], currentRound: 1 };
 }
 export function canStartVoting(room: DecisionRoom): boolean { return ["setup", "collecting", "reviewing"].includes(room.phase) && room.cards.length >= MIN_CARDS_TO_VOTE; }
 export function canAddCard(room: DecisionRoom): boolean { return ["setup", "collecting", "reviewing"].includes(room.phase) && room.cards.length < ROOM_CARD_LIMIT; }
