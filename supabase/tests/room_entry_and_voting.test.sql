@@ -74,7 +74,7 @@ select lives_ok(
     (select payload->>'room_code' from test_host),
     (select payload->>'participant_id' from test_host),
     (select payload->>'participant_secret' from test_host),
-    (select payload->>'id' from test_cards order by payload->>'id' limit 1),
+    (select payload->>'id' from test_cards where payload->>'submitter_participant_id' = (select payload->>'participant_id' from test_host) limit 1),
     '{"title":"Host reviewed option"}'
   ),
   'the host can edit a card during final deck review'
@@ -86,7 +86,7 @@ select throws_ok(
     (select payload->>'room_code' from test_host),
     (select payload->>'participant_id' from test_guest),
     (select payload->>'participant_secret' from test_guest),
-    (select payload->>'id' from test_cards order by payload->>'id' limit 1),
+    (select payload->>'id' from test_cards where payload->>'submitter_participant_id' = (select payload->>'participant_id' from test_host) limit 1),
     '{"title":"Unauthorized edit"}'
   ),
   '42501',
