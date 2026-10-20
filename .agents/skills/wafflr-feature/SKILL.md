@@ -7,7 +7,7 @@ description: Implement or change a Wafflr product feature, screen, user flow, or
 
 ## Before coding
 1. Read `/AGENTS.md`.
-2. Read `docs/README.md`, then the relevant product flow, screen catalog, decision engine, and decision log sections.
+2. Read `docs/README.md`, then the relevant user journey, screen catalog, decision engine, and architecture sections.
 3. Identify which behavior is Confirmed, Proposed, or Open. If an open decision materially blocks implementation, ask instead of silently inventing a rule.
 4. Decide whether the work belongs in `packages/core`, `packages/ui`, or `apps/web`.
 
@@ -22,5 +22,5 @@ description: Implement or change a Wafflr product feature, screen, user flow, or
 ## Verification
 - Add/update unit tests for domain behavior and interaction tests for meaningful user flows.
 - Run formatting, lint/typecheck, build, and relevant tests where the environment permits.
-- Update the relevant docs and decision log in the same change if behavior or architecture changed.
+- Update the relevant approved docs in the same change if behavior or architecture changed.
 - In the handoff, summarize behavior changed, files affected, tests run, and any unresolved assumptions.

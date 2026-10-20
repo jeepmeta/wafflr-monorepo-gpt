@@ -1,12 +1,12 @@
 # Development Setup
 
-## Prerequisites
+## Requirements
 
-- Node.js 22 or newer.
-- pnpm 10 or newer. The repository pins its package manager version in the root `package.json`.
-- Git and access to the GitHub repository.
+- Node.js 22+
+- pnpm 10+ (the package manager version is pinned in root `package.json`)
+- Git and repository access
 
-## First run
+## Start
 
 ```bash
 corepack enable
@@ -14,28 +14,35 @@ pnpm install
 pnpm dev
 ```
 
-The web app is expected at `http://localhost:5173`. The mobile workspace is intentionally a placeholder; do not expect an Expo app to launch yet.
+Web dev server: `http://localhost:5173`. The mobile app is a placeholder, not a runnable Expo client.
 
-## Common checks
+## Commands
 
-```bash
-pnpm format:check
-pnpm lint
-pnpm typecheck
-pnpm build
-```
+| Command | Purpose |
+|---|---|
+| `pnpm dev` | Start configured workspace dev tasks |
+| `pnpm build` | Build configured apps/packages |
+| `pnpm lint` | Run configured lint tasks |
+| `pnpm typecheck` | Run TypeScript checks |
+| `pnpm format` | Format with Prettier |
+| `pnpm format:check` | Check formatting |
+| `pnpm tokens:generate` | Generate token CSS and TypeScript |
+| `pnpm tokens:check` | Verify generated token outputs are current |
 
-Use `pnpm format` to apply Prettier. Run the token generation/check command documented in `packages/config/README.md` when changing design tokens.
+No root test command is currently defined. Use existing package-specific tests if present; add tests with new domain behavior.
 
-## Environment variables
+## Environment safety
 
-Copy `.env.example` to a local environment file only when a feature needs those values. Keep local environment files untracked. The current web prototype does not require Supabase credentials; the example variables are reserved for the planned integration.
-
-Only public Supabase project URL and publishable/anon key may be used by browser code. Never put a service-role key, database password, access token, or other secret in a `VITE_*` variable.
+- The current prototype does not require Supabase credentials.
+- Keep local `.env*` files untracked; commit only clearly fake `.env.example` templates when needed.
+- Browser-exposed variables (typically `VITE_*`) are public. Only the Supabase project URL and publishable/anon key may be exposed.
+- Never commit service-role keys, database passwords, access tokens, production data, or real secrets. Do not put secrets in client code.
+- Do not create or connect production Supabase resources until migrations, RLS, and authorization have been reviewed.
 
 ## Working agreements
 
-- Read `AGENTS.md` and the relevant skill under `.agents/skills/`.
-- Product requirements live under `docs/`; update them alongside meaningful behavior changes.
-- Prefer small feature branches and pull requests. CI currently runs typecheck and build; do not treat that as a substitute for feature-specific tests.
-- The repository starter currently does not include a committed `pnpm-lock.yaml`. The first `pnpm install` generates one; commit that file before relying on reproducible installs or enabling pnpm caching in CI. When package manifests change afterward, regenerate and commit the lockfile rather than bypassing it.
+- Read [the docs index](./README.md), root `AGENTS.md`, and the relevant skill before changing behavior.
+- Use small branches and pull requests; let CI run and report checks accurately.
+- Keep business rules in `packages/core`, design tokens in `packages/config/tokens.source.json`, and browser-specific behavior in `apps/web`.
+- Regenerate token outputs with `pnpm tokens:generate`; never edit generated token files by hand.
+- Update the relevant document and tests when a confirmed contract changes. Do not add documentation files outside the approved docs list without explicit approval.
