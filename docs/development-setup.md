@@ -33,4 +33,4 @@ Only public Supabase project URL and publishable/anon key may be used by browser
 - Read `AGENTS.md` and the relevant skill under `.agents/skills/`.
 - Product requirements live under `docs/`; update them alongside meaningful behavior changes.
 - Prefer small feature branches and pull requests. CI currently runs typecheck and build; do not treat that as a substitute for feature-specific tests.
-- Use `pnpm-lock.yaml` as the reproducible dependency record. If package manifests change, regenerate and commit the lockfile using pnpm instead of bypassing it.
+- The repository starter currently does not include a committed `pnpm-lock.yaml`. The first `pnpm install` generates one; commit that file before relying on reproducible installs or enabling pnpm caching in CI. When package manifests change afterward, regenerate and commit the lockfile rather than bypassing it.
