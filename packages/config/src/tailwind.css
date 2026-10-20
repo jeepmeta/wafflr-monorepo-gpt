@@ -1,0 +1,27 @@
+/* Semantic Tailwind CSS v4 aliases. Values come from generated Wafflr CSS tokens. */
+@theme inline {
+  --color-canvas: var(--wafflr-color-paper);
+  --color-surface: var(--wafflr-color-surface);
+  --color-surface-raised: var(--wafflr-color-surface-raised);
+  --color-ink: var(--wafflr-color-ink);
+  --color-ink-soft: var(--wafflr-color-ink-soft);
+  --color-ink-muted: var(--wafflr-color-ink-muted);
+  --color-line: var(--wafflr-color-line);
+  --color-line-strong: var(--wafflr-color-line-strong);
+  --color-brand-primary: var(--wafflr-color-coral);
+  --color-brand-primary-soft: var(--wafflr-color-coral-soft);
+  --color-brand-accent: var(--wafflr-color-butter);
+  --color-brand-accent-soft: var(--wafflr-color-butter-soft);
+  --color-action-positive: var(--wafflr-color-mint-strong);
+  --color-action-positive-soft: var(--wafflr-color-mint);
+  --color-action-danger: var(--wafflr-color-danger);
+  --color-action-danger-soft: var(--wafflr-color-danger-soft);
+  --font-sans: var(--wafflr-font-body);
+  --font-display: var(--wafflr-font-display);
+  --radius-control: var(--wafflr-radius-md);
+  --radius-card: var(--wafflr-radius-lg);
+  --radius-panel: var(--wafflr-radius-xl);
+  --radius-pill: var(--wafflr-radius-pill);
+  --shadow-card: var(--wafflr-shadow-card);
+  --shadow-float: var(--wafflr-shadow-float);
+}

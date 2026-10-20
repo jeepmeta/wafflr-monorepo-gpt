@@ -6,6 +6,11 @@
   "exports": {
     ".": "./src/index.ts",
     "./tokens": "./src/tokens.ts",
-    "./tokens.css": "./src/tokens.css"
+    "./tokens.css": "./src/tokens.css",
+    "./tailwind.css": "./src/tailwind.css"
+  },
+  "scripts": {
+    "generate": "node scripts/generate-tokens.mjs",
+    "check:generated": "node scripts/generate-tokens.mjs --check"
   }
 }

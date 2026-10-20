@@ -3,14 +3,14 @@
   "private": true,
   "version": "0.1.0",
   "packageManager": "pnpm@10.18.1",
-  "engines": {
-    "node": ">=22"
-  },
+  "engines": { "node": ">=22" },
   "scripts": {
-    "dev": "turbo dev",
-    "build": "turbo build",
-    "lint": "turbo lint",
-    "typecheck": "turbo typecheck",
+    "dev": "pnpm tokens:check && turbo dev",
+    "build": "pnpm tokens:check && turbo build",
+    "lint": "pnpm tokens:check && turbo lint",
+    "typecheck": "pnpm tokens:check && turbo typecheck",
+    "tokens:build": "node packages/config/scripts/generate-tokens.mjs",
+    "tokens:check": "node packages/config/scripts/generate-tokens.mjs --check",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
