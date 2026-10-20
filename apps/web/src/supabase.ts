@@ -59,6 +59,10 @@ export function createBackend(url: string, publishableKey: string, fetcher: type
       rpc<{ round_id: string; round_number: number; eligible_card_ids: string[] }>("start_tie_breaker", { p_room_code: identity.room_code, p_participant_id: identity.participant_id, p_participant_secret: identity.participant_secret }),
     chooseTieWinner: (identity: RoomIdentity, cardId: string) =>
       rpc<{ winner_card_id: string; resolution: string }>("choose_tie_winner", { p_room_code: identity.room_code, p_participant_id: identity.participant_id, p_participant_secret: identity.participant_secret, p_card_id: cardId }),
+    leaveTieUnresolved: (identity: RoomIdentity) =>
+      rpc<{ phase: RoomPhase; resolution: string }>("leave_tie_unresolved", { p_room_code: identity.room_code, p_participant_id: identity.participant_id, p_participant_secret: identity.participant_secret }),
+    closeRoom: (identity: RoomIdentity) =>
+      rpc<{ phase: RoomPhase; closed_at: string; expires_at: string }>("close_room", { p_room_code: identity.room_code, p_participant_id: identity.participant_id, p_participant_secret: identity.participant_secret }),
     chooseNoBallotWinner: (identity: RoomIdentity, roundId: string, cardId: string) =>
       rpc<{ winner_card_id: string; resolution: string }>("choose_no_ballot_winner", { p_room_code: identity.room_code, p_participant_id: identity.participant_id, p_participant_secret: identity.participant_secret, p_round_id: roundId, p_card_id: cardId }),
     roundResults: (identity: RoomIdentity, roundId: string) =>
