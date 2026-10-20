@@ -4,7 +4,7 @@ Screen names below describe intended product surfaces, not final route paths. Co
 
 ## Home
 
-**Purpose:** explain Wafflr quickly and help users create or re-enter a decision room.
+**Purpose:** explain Wafflr quickly and help users create or join a decision room.
 
 **Confirmed empty state:** minimal branding and primary buttons. Keep the first-use path obvious rather than filling the screen with an empty-room dashboard.
 
