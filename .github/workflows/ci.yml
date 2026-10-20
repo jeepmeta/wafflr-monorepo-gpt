@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Typecheck and build
+    name: Token consistency, typecheck, and build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -24,8 +24,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: pnpm
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
+      - name: Check generated design tokens
+        run: pnpm tokens:check
       - name: Typecheck
         run: pnpm typecheck
       - name: Build
