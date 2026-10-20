@@ -12,7 +12,9 @@
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "tokens:generate": "pnpm --filter @wafflr/config tokens:generate",
+    "tokens:check": "pnpm --filter @wafflr/config tokens:check"
   },
   "devDependencies": {
     "prettier": "^3.6.2",
