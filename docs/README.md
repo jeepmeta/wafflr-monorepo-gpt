@@ -11,7 +11,7 @@
 ## Source-of-truth documents
 
 | File | Contract |
-|---|---|
+| --- | --- |
 | [Development setup](./development-setup.md) | Local environment, commands, safe configuration, working agreements |
 | [Backend plan](./backend-plan.md) | Supabase responsibilities, security, conceptual data, retention, sequence |
 | [Official technical references](./references/README.md) | Official stack documentation |

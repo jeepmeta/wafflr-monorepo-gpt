@@ -13,7 +13,7 @@
 ## Workspace boundaries
 
 | Path | Responsibility | Constraints |
-|---|---|---|
+| --- | --- | --- |
 | `apps/web` | Browser UI, routes, PWA, browser integrations | No authoritative domain rules in components |
 | `apps/mobile` | Future native client | Do not build until explicitly scheduled; reuse domain rules |
 | `packages/core` | Room phases, permissions, cards, ballots, tally/tie rules | Platform-neutral; no React/DOM/browser/native imports |

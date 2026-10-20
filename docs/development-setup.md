@@ -19,7 +19,7 @@ Web dev server: `http://localhost:5173`. The mobile app is a placeholder, not a 
 ## Commands
 
 | Command | Purpose |
-|---|---|
+| --- | --- |
 | `pnpm dev` | Start configured workspace dev tasks |
 | `pnpm build` | Build configured apps/packages |
 | `pnpm lint` | Run configured lint tasks |

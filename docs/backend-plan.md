@@ -23,7 +23,7 @@
 ## Conceptual data model
 
 | Entity | Purpose |
-|---|---|
+| --- | --- |
 | `rooms` | Code, category, phase, contribution mode, creator reference, timestamps, expiry |
 | `participants` | Anonymous room-scoped identity, role, contribution/voting completion |
 | `cards` | Room, submitter, category-specific fields, order, timestamps |
