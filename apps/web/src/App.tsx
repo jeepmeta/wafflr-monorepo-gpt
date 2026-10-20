@@ -3,7 +3,7 @@ import { HomeScreen } from "./screens/HomeScreen";
 import { JoinScreen } from "./screens/JoinScreen";
 import { SetupScreen } from "./screens/SetupScreen";
 import { ConfirmDialog } from "./components/Modal";
-import { ArrowLeft, ArrowRight, Check, CircleHelp, Copy, Plus, Sparkles, Trash2, Users, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CircleHelp, Clapperboard, Copy, Footprints, Plus, Sparkles, Trash2, Utensils, Users, WandSparkles, X } from "lucide-react";
 import { applyRoomAction, canStartVoting, createRoom, resolveCurrentRound, type DecisionCategory, type DecisionRoom, type VoteValue } from "@wafflr/core";
 import { Badge, Butters, Button, Card, EmptyState, SectionHeading, TextField } from "@wafflr/ui";
 
