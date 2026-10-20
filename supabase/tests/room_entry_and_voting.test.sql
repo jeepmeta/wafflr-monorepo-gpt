@@ -91,6 +91,7 @@ select throws_ok(
     (select jsonb_agg(jsonb_build_object('card_id', payload->>'id', 'approved', false))::text from test_cards)
   ),
   '23505',
+  'duplicate key value violates unique constraint "ballots_voting_round_id_participant_id_key"',
   'duplicate ballot submission is rejected'
 );
 
