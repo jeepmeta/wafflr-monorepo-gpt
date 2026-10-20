@@ -66,7 +66,7 @@ export function EmptyState({ emoji = "🧇", title, description, action }: { emo
 }
 
 export function Butters({ mood = "happy", size = "md", label = "Butters the Waffle" }: { mood?: "happy" | "thinking" | "celebrating"; size?: "sm" | "md" | "lg"; label?: string }) {
-  return <span className={`wf-butters wf-butters--${size} wf-butters--${mood}`} role="img" aria-label={label}><span aria-hidden="true">🧇</span><span className="wf-butters__face" aria-hidden="true">{mood === "thinking" ? "🤔" : mood === "celebrating" ? "✨" : "😊"}</span></span>;
+  return <span className={`wf-butters wf-butters--${size} wf-butters--${mood}`} role="img" aria-label={label}><span className="wf-butters__art-placeholder" aria-hidden="true"><span className="wf-butters__placeholder-icon">✦</span><span className="wf-butters__placeholder-label">Butters art</span></span><span className="wf-butters__face" aria-hidden="true">{mood === "thinking" ? "?" : mood === "celebrating" ? "✦" : "•"}</span></span>;
 }
 
 export function IconButton({ label, className = "", children, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string }) {

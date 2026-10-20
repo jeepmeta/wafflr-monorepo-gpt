@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@wafflr/ui/styles.css";
+@import "./responsive.css";
 
 :root { font-family:var(--wafflr-font-body); font-synthesis:none; text-rendering:optimizeLegibility; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
 html { min-width:320px; background:var(--wafflr-color-paper); }
