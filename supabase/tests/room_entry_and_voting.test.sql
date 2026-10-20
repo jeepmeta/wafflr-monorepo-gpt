@@ -1,6 +1,6 @@
 begin;
 
-select plan(14);
+select plan(15);
 
 select has_table('public', 'rooms', 'rooms table exists');
 select has_table('public', 'participants', 'participants table exists');
@@ -91,6 +91,13 @@ select ok(
   (select payload->>'phase' from test_round) = 'voting'
   and jsonb_array_length((select payload->'eligible_card_ids' from test_round)) = 2,
   'host start locks a two-card deck into a voting round'
+);
+
+select throws_ok(
+  format('select public.join_room(%L)', (select payload->>'room_code' from test_host)),
+  '55000',
+  'Room is no longer accepting participants',
+  'new participants cannot join after voting starts'
 );
 
 select lives_ok(

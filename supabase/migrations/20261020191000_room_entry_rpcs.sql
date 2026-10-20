@@ -130,6 +130,9 @@ begin
   if not found then
     raise exception using errcode = 'P0002', message = 'Room not found or no longer available';
   end if;
+  if v_room.phase not in ('setup', 'collecting', 'reviewing') then
+    raise exception using errcode = '55000', message = 'Room is no longer accepting participants';
+  end if;
 
   v_identity_secret := pg_catalog.encode(extensions.gen_random_bytes(32), 'hex');
   v_identity_hash := pg_catalog.encode(extensions.digest(pg_catalog.convert_to(v_identity_secret, 'UTF8'), 'sha256'), 'hex');

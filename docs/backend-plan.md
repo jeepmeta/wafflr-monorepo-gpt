@@ -1,6 +1,6 @@
 # Backend Plan
 
-**Status:** Six versioned migrations pass clean local Supabase CI, including 28 pgTAP assertions. The web app now has an opt-in RPC-backed shared-room MVP for create/join, card contribution, voting, and result/tie flow. No hosted Supabase project is connected yet. Rate limiting, scheduled cleanup/fallback execution, and room-scoped realtime authorization remain unimplemented.
+**Status:** Six versioned migrations pass clean local Supabase CI, including 29 pgTAP assertions. The web app now has an opt-in RPC-backed shared-room MVP for create/join, card contribution, voting, and result/tie flow. No hosted Supabase project is connected yet. Rate limiting, scheduled cleanup/fallback execution, and room-scoped realtime authorization remain unimplemented.
 
 ## Responsibilities
 
