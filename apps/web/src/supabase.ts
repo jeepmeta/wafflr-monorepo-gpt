@@ -4,13 +4,13 @@ export type ParticipantRole = "host" | "guest";
 export type RoomPhase = "setup" | "collecting" | "reviewing" | "voting" | "tie-breaker" | "tie-result" | "winner" | "closed";
 export type RoomIdentity = { room_code: string; room_id: string; participant_id: string; participant_secret: string; role: ParticipantRole; title: string; category: RoomCategory; phase: RoomPhase; contribution_mode: ContributionMode; cards_per_participant: number | null };
 export type RoomCard = { id: string; submitter_participant_id: string; category_data: { title?: string; category?: string; location?: string; [key: string]: unknown }; position: number; created_at: string; updated_at: string };
-export type RoomSnapshot = { room_id: string; room_code: string; title: string; category: RoomCategory; phase: RoomPhase; contribution_mode: ContributionMode; cards_per_participant: number | null; active_round_id: string | null; closed_at: string | null; expires_at: string | null; participant_id: string; role: ParticipantRole; contribution_done: boolean; cards: RoomCard[] };
+export type RoomSnapshot = { room_id: string; room_code: string; title: string; category: RoomCategory; phase: RoomPhase; contribution_mode: ContributionMode; cards_per_participant: number | null; active_round_id: string | null; active_round_eligible_card_ids: string[]; closed_at: string | null; expires_at: string | null; participant_id: string; role: ParticipantRole; contribution_done: boolean; cards: RoomCard[] };
 type RpcErrorPayload = { message?: string; details?: string; hint?: string; code?: string };
 export class BackendError extends Error {
   constructor(message: string, readonly code?: string) { super(message); this.name = "BackendError"; }
 }
 export function createBackend(url: string, publishableKey: string, fetcher: typeof fetch = fetch) {
-  const base = url.replace(/\\/+$/, "");
+  const base = url.replace(/\/+$/, "");
   async function rpc<T>(name: string, args: Record<string, unknown> = {}): Promise<T> {
     let response: Response;
     try {
