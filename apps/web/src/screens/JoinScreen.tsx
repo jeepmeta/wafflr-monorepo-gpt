@@ -1,0 +1,5 @@
+import { ArrowLeft } from "lucide-react";
+import { Butters, Button, Card, SectionHeading, TextField } from "@wafflr/ui";
+export function JoinScreen({code,onCodeChange,error,onBack,onContinue}:{code:string;onCodeChange:(value:string)=>void;error:string;onBack:()=>void;onContinue:()=>void}) {
+ return <section className="narrow-screen"><Button variant="quiet" leadingIcon={<ArrowLeft size={17}/>} onClick={onBack}>Back</Button><Card className="form-card"><Butters size="md"/><SectionHeading title="Join the decision" description="Enter the room code or scan the host’s QR code."/><TextField label="Room code" value={code} onChange={event=>onCodeChange(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,8))} placeholder="e.g. WAFFLR" autoCapitalize="characters"/><p className="field-note">Joining a live shared room will be connected when room sync is implemented.</p><Button fullWidth disabled={code.trim().length<4} onClick={onContinue}>Continue with code</Button>{error&&<p className="inline-error" role="alert">{error}</p>}</Card></section>;
+}

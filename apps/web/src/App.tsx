@@ -1,5 +1,9 @@
 import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, ChevronRight, CircleHelp, Copy, Plus, Sparkles, Trash2, Utensils, Clapperboard, Footprints, WandSparkles, Users, X } from "lucide-react";
+import { HomeScreen } from "./screens/HomeScreen";
+import { JoinScreen } from "./screens/JoinScreen";
+import { SetupScreen } from "./screens/SetupScreen";
+import { ConfirmDialog } from "./components/Modal";
+import { ArrowLeft, ArrowRight, Check, CircleHelp, Copy, Plus, Sparkles, Trash2, Users, X } from "lucide-react";
 import { applyRoomAction, canStartVoting, createRoom, resolveCurrentRound, type DecisionCategory, type DecisionRoom, type VoteValue } from "@wafflr/core";
 import { Badge, Butters, Button, Card, EmptyState, SectionHeading, TextField } from "@wafflr/ui";
 
@@ -26,7 +30,7 @@ export default function App() {
   const [error, setError] = useState("");
   const [responses, setResponses] = useState<Record<string, VoteValue>>({});
   const [voteIndex, setVoteIndex] = useState(0);
-  const [joinCode, setJoinCode] = useState("");
+  const [joinCode, setJoinCode] = useState("");\n  const [confirmStartOpen, setConfirmStartOpen] = useState(false);\n  const [removeCardId, setRemoveCardId] = useState<string | null>(null);
 
   const creatorId = "this-device";
   const activeCards = useMemo(() => {
@@ -132,49 +136,13 @@ export default function App() {
         <span className="topbar-tag">Stop waffling. Start living.</span>
       </header>
 
-      {screen === "home" && <section className="home-layout">
-        <div className="home-copy">
-          <Badge tone="warning"><Sparkles size={13} /> MADE FOR GROUP DECISIONS</Badge>
-          <h1>Less waffling.<br /><span>More living.</span></h1>
-          <p className="hero-description">Get everyone’s options on the table, vote together, and get on with the good stuff.</p>
-          <div className="home-actions">
-            <Button size="lg" trailingIcon={<ArrowRight size={18} />} onClick={beginSetup}>Create a room</Button>
-            <Button size="lg" variant="secondary" onClick={() => { setError(""); setScreen("join"); }}>Join a room</Button>
-          </div>
-          <p className="microcopy"><Users size={15} /> No accounts. No names. Just a decision.</p>
-        </div>
-        <div className="hero-art" aria-label="A preview of a group decision">
-          <div className="floating-spark spark-one">✦</div><div className="floating-spark spark-two">✧</div>
-          <Card className="preview-card">
-            <div className="preview-header"><div><span className="eyebrow">TONIGHT’S BIG QUESTION</span><h2>Where should we eat?</h2></div><span className="mini-avatar">👥</span></div>
-            <div className="food-art">🍕</div>
-            <div className="preview-option"><div><h3>Pizza night?</h3><p>Crispy edges. Melty cheese. Happy crew.</p></div><span className="yes-chip">Yup!</span></div>
-            <div className="preview-footer"><span>Everyone gets a say</span><span>One happy winner <Sparkles size={13} /></span></div>
-          </Card>
-          <div className="butters-float"><Butters mood="celebrating" size="lg" /><span>Hey, friend!</span></div>
-        </div>
-      </section>}
+      {screen === "home" && <HomeScreen onCreate={beginSetup} onJoin={() => { setError(""); setScreen("join"); }} />}
 
-      {screen === "join" && <section className="narrow-screen">
-        <Button variant="quiet" leadingIcon={<ArrowLeft size={17} />} onClick={() => setScreen("home")}>Back</Button>
-        <Card className="form-card"><Butters size="md" /><SectionHeading title="Join the decision" description="Enter the room code or scan the host’s QR code." /><TextField label="Room code" value={joinCode} onChange={(event) => setJoinCode(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8))} placeholder="e.g. WAFFLR" autoCapitalize="characters" /><p className="field-note">Joining a live shared room will be connected when room sync is implemented.</p><Button fullWidth disabled={joinCode.trim().length < 4} onClick={() => setError("Live room joining needs the shared room service, which is not connected yet.")}>Continue with code</Button>{error && <p className="inline-error" role="alert">{error}</p>}</Card>
-      </section>}
+      {screen === "join" && <JoinScreen code={joinCode} onCodeChange={setJoinCode} error={error} onBack={() => setScreen("home")} onContinue={() => setError("Live room joining needs the shared room service, which is not connected yet.")} />}
 
-      {screen === "setup" && <section className="workflow-screen">
-        <Button variant="quiet" leadingIcon={<ArrowLeft size={17} />} onClick={() => setScreen("home")}>Back home</Button>
-        <SectionHeading eyebrow="STEP 1 OF 2" title="What are we deciding?" description="One room, one decision. Keep it simple." />
-        <div className="room-title-field"><TextField label="Give your decision a title" value={roomTitle} onChange={(event) => setRoomTitle(event.target.value.slice(0, 80))} placeholder={category === "eat" ? "e.g. Where should we eat?" : category === "watch" ? "e.g. Movie night pick" : category === "do" ? "e.g. Saturday plans" : "e.g. Help us decide"} maxLength={80} required /><span className="field-note">Make it easy for everyone to know what this room is for.</span></div>
-        <div className="category-grid">{categories.map((item) => { const Icon = item.icon; return <button key={item.id} className={`category-choice ${category === item.id ? "is-selected" : ""}`} onClick={() => setCategory(item.id)}><span className="category-icon"><Icon size={22} /></span><span className="category-title">{item.title}</span><span className="category-subtitle">{item.subtitle}</span>{category === item.id && <span className="selected-check"><Check size={14} /></span>}</button>; })}</div>
-        <SectionHeading eyebrow="STEP 2 OF 2" title="Who’s adding options?" description="The creator is a regular participant, too." />
-        <div className="mode-grid">
-          <button className={`mode-choice ${mode === "creator-only" ? "is-selected" : ""}`} onClick={() => setMode("creator-only")}><span className="mode-emoji">🧇</span><strong>I’ll add all the cards</strong><span>I’ll build the deck, then everyone votes.</span></button>
-          <button className={`mode-choice ${mode === "guests-contribute" ? "is-selected" : ""}`} onClick={() => setMode("guests-contribute")}><span className="mode-emoji">🙌</span><strong>Let everyone contribute</strong><span>Everyone can add their own options before voting.</span></button>
-        </div>
-        {mode === "guests-contribute" && <div className="quota-row"><div><strong>Cards per guest</strong><p>Unused slots are fine. Nobody gets stuck.</p></div><div className="quota-picker">{([1,2,3] as const).map((n) => <button key={n} className={quota === n ? "active" : ""} onClick={() => setQuota(n)} aria-pressed={quota === n}>{n}</button>)}</div></div>}
-        {error && <p className="inline-error" role="alert">{error}</p>}<div className="workflow-footer"><span>Room limit: 100 cards total</span><Button size="lg" trailingIcon={<ArrowRight size={18} />} onClick={createNewRoom}>Create room</Button></div>
-      </section>}
+      {screen === "setup" && <SetupScreen title={roomTitle} onTitleChange={setRoomTitle} category={category} onCategoryChange={setCategory} mode={mode} onModeChange={setMode} quota={quota} onQuotaChange={setQuota} error={error} onBack={() => setScreen("home")} onCreate={createNewRoom} />}
 
-      {screen === "review" && room && <section className="workflow-screen deck-review-screen"><Button variant="quiet" leadingIcon={<ArrowLeft size={17} />} onClick={() => setScreen("room")}>Back to deck</Button><SectionHeading eyebrow="FINAL DECK REVIEW" title={room.title} description="Give the deck one last look. You can edit or remove any option before the group starts voting." action={<Badge>{room.cards.length}/100 cards</Badge>} /><div className="review-card-grid">{room.cards.map((card, index) => <Card className="review-card" key={card.id}><div className="option-card-top"><span className="option-number">{String(index + 1).padStart(2, "0")}</span><div className="option-card-controls"><button className="remove-option" onClick={() => editCard(card.id)} aria-label={`Edit ${card.title}`} title="Edit this card"><span aria-hidden="true">✎</span></button><button className="remove-option" onClick={() => removeCard(card.id)} aria-label={`Remove ${card.title}`} title="Remove this card"><X size={16} /></button></div></div><div className="option-emoji">{category === "eat" ? ["🍕","🍜","🌮","🍔","🥗"][index % 5] : category === "watch" ? "🎬" : category === "do" ? "🎯" : "💡"}</div><h3>{card.title}</h3>{card.category && <span className="option-meta">{card.category}</span>}{card.location && <p className="option-location">{card.location}</p>}</Card>)}</div>{error && <p className="inline-error" role="alert">{error}</p>}<div className="workflow-footer sticky-footer"><span>{room.cards.length < 2 ? "Add at least two options before voting." : "Once voting starts, this deck is locked."}</span><div className="review-actions"><Button variant="secondary" onClick={() => setScreen("room")}>Add more options</Button><Button size="lg" trailingIcon={<ArrowRight size={18} />} disabled={!canStartVoting(room)} onClick={confirmStartVoting}>Lock deck & start voting</Button></div></div></section>}
+      {screen === "review" && room && <section className="workflow-screen deck-review-screen"><Button variant="quiet" leadingIcon={<ArrowLeft size={17} />} onClick={() => setScreen("room")}>Back to deck</Button><SectionHeading eyebrow="FINAL DECK REVIEW" title={room.title} description="Give the deck one last look. You can edit or remove any option before the group starts voting." action={<Badge>{room.cards.length}/100 cards</Badge>} /><div className="review-card-grid">{room.cards.map((card, index) => <Card className="review-card" key={card.id}><div className="option-card-top"><span className="option-number">{String(index + 1).padStart(2, "0")}</span><div className="option-card-controls"><button className="remove-option" onClick={() => editCard(card.id)} aria-label={`Edit ${card.title}`} title="Edit this card"><span aria-hidden="true">✎</span></button><button className="remove-option" onClick={() => setRemoveCardId(card.id)} aria-label={`Remove ${card.title}`} title="Remove this card"><X size={16} /></button></div></div><div className="option-emoji">{category === "eat" ? ["🍕","🍜","🌮","🍔","🥗"][index % 5] : category === "watch" ? "🎬" : category === "do" ? "🎯" : "💡"}</div><h3>{card.title}</h3>{card.category && <span className="option-meta">{card.category}</span>}{card.location && <p className="option-location">{card.location}</p>}</Card>)}</div>{error && <p className="inline-error" role="alert">{error}</p>}<div className="workflow-footer sticky-footer"><span>{room.cards.length < 2 ? "Add at least two options before voting." : "Once voting starts, this deck is locked."}</span><div className="review-actions"><Button variant="secondary" onClick={() => setScreen("room")}>Add more options</Button><Button size="lg" trailingIcon={<ArrowRight size={18} />} disabled={!canStartVoting(room)} onClick={() => setConfirmStartOpen(true)}>Lock deck & start voting</Button></div></div></section>}
 
       {screen === "room" && room && <section className="workflow-screen">
         <div className="room-topline"><Button variant="quiet" leadingIcon={<ArrowLeft size={17} />} onClick={() => setScreen("home")}>Home</Button><Badge tone="success">Room created</Badge></div>
@@ -202,7 +170,7 @@ export default function App() {
 
       {screen === "winner" && room && <section className="winner-screen"><div className="confetti" aria-hidden="true">✦　✧　✦　✧　✦</div><Butters mood="celebrating" size="lg" /><Badge tone="success">THE GROUP HAS SPOKEN</Badge><h1>It’s a <span>winner!</span></h1><p className="winner-subtitle">No more waffling. Go make it happen.</p><Card className="winner-card"><div className="winner-emoji">{category === "eat" ? "🍕" : category === "watch" ? "🎬" : category === "do" ? "🎉" : "💡"}</div><h2>{room.cards.find((card) => card.id === room.winnerCardId)?.title ?? "Your group’s pick"}</h2><p>{room.cards.find((card) => card.id === room.winnerCardId)?.location}</p><span className="winner-ribbon">WINNER ✨</span></Card><Button size="lg" onClick={() => setScreen("home")}>Back to home</Button><p className="field-note">This is a local prototype; shared real-time rooms are the next integration step.</p></section>}
 
-      <footer className="site-footer"><span>🧇 Wafflr</span><span>Stop waffling. Start living.</span><button onClick={() => setError(error ? "" : "Wafflr keeps decisions anonymous. No participant names or individual vote details are shown.")} aria-label="About Wafflr"><CircleHelp size={16} /></button></footer>
+      <ConfirmDialog open={confirmStartOpen} title="Lock the deck and start voting?" description="Everyone will vote on this exact set of options. You won’t be able to edit the deck after voting starts." confirmLabel="Lock deck & start" onCancel={() => setConfirmStartOpen(false)} onConfirm={() => { setConfirmStartOpen(false); confirmStartVoting(); }} />\n      <ConfirmDialog open={Boolean(removeCardId)} title="Remove this option?" description="This option will be removed from the deck. You can add it again before voting starts." confirmLabel="Remove option" destructive onCancel={() => setRemoveCardId(null)} onConfirm={() => { if (removeCardId) removeCard(removeCardId); setRemoveCardId(null); }} />\n      <footer className="site-footer"><span>🧇 Wafflr</span><span>Stop waffling. Start living.</span><button onClick={() => setError(error ? "" : "Wafflr keeps decisions anonymous. No participant names or individual vote details are shown.")} aria-label="About Wafflr"><CircleHelp size={16} /></button></footer>
       {error && screen !== "room" && screen !== "vote" && screen !== "tie" && screen !== "join" && <p className="toast-message" role="status">{error}<button onClick={() => setError("")} aria-label="Dismiss"><X size={14} /></button></p>}
     </main>
   );
