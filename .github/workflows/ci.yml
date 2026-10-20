@@ -20,20 +20,12 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: 10.18.1
-      # Do not enable setup-node's pnpm cache until pnpm-lock.yaml is committed.
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
-      - name: Preserve generated lockfile during repository bootstrap
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: pnpm-lockfile-bootstrap
-          path: pnpm-lock.yaml
-          if-no-files-found: warn
       - name: Check generated design tokens
         run: pnpm tokens:check
       - name: Typecheck
