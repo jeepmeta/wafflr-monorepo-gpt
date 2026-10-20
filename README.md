@@ -63,3 +63,7 @@ Keep domain logic in packages/core free of browser and React Native APIs. Keep w
 ## AI coding agents
 
 Start with [AGENTS.md](./AGENTS.md). Task-specific agent skills live in `.agents/skills/`, GitHub Copilot guidance lives in `.github/copilot-instructions.md`, and the product/technical reference hub is [docs/README.md](./docs/README.md). Update documentation with meaningful behavior or architecture changes. Never commit credentials.
+
+## Continuous integration
+
+Pull requests run the design-token consistency check, TypeScript checks, and production build. This is the baseline; feature-specific tests should be added as behavior is implemented.
