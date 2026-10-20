@@ -1,6 +1,6 @@
 # Backend Plan
 
-**Status:** Six versioned migrations and pgTAP test scripts are committed. The schema and trusted room/card/voting/result/lifecycle operations are drafted, but have not been applied to a Supabase project. Rate limiting, scheduled cleanup/fallback execution, realtime authorization, and web integration remain unimplemented.
+**Status:** Six versioned migrations are committed and have passed a clean local Supabase migration run in GitHub Actions. All 26 pgTAP assertions pass, and the web token/typecheck/build job passes. No hosted Supabase project is connected yet. Rate limiting, scheduled cleanup/fallback execution, realtime authorization, and web integration remain unimplemented.
 
 ## Responsibilities
 
@@ -37,7 +37,7 @@ The room code is currently 12 characters from a 32-symbol ambiguity-reduced alph
 
 **Important limitations before public launch:**
 
-- These SQL migrations have not been run against PostgreSQL/Supabase. Verify extension/function availability and migration execution in a disposable local Supabase stack first.
+- The migrations have been applied successfully to a disposable local Supabase stack in CI, and all current pgTAP tests pass. This validates the current test coverage, not production readiness; continue expanding authorization, concurrency, lifecycle, and abuse-control tests.
 - Creation/join RPCs do not yet implement request rate limits, abuse controls, or a robust per-client creation throttle. Add those before public exposure; room codes are not secrets that replace rate limiting.
 - `finish_contribution` and the trusted stale-host/cleanup functions exist, but they are not scheduled or connected to the web app. The client must call `heartbeat_participant` regularly before the ten-minute fallback is scheduled; otherwise an active host could appear disconnected. A trusted worker/cron job must call `resolve_stale_host_rooms` and `delete_expired_rooms`.
 - There are no room-scoped realtime authorization policies yet. Direct table access remains revoked; do not connect the browser to the tables or assume realtime synchronization works.
@@ -57,7 +57,7 @@ supabase test db --local
 supabase stop
 ```
 
-The first successful CI run is the verification gate; adding the workflow does not itself prove the SQL passes. Review the database job output and fix any migration/test failures before treating these RPCs as ready for integration. The existing web build job and the database job validate separate parts of the repository.
+The successful CI run is recorded at [GitHub Actions](https://github.com/jeepmeta/wafflr-monorepo-gpt/actions/runs/39488394549). The existing web build job and database job validate separate parts of the repository; neither implies that realtime or browser integration is complete.
 
 ## Conceptual data model
 
@@ -82,12 +82,12 @@ A room code/QR contains the code only; no join URL or deep link is required.
 
 ## Implementation order
 
-1. Run migrations and pgTAP tests in a disposable local Supabase environment; fix any SQL/runtime failures before proceeding.
-2. Implement and test rate limiting/abuse controls and participant secret lifecycle.
-3. Implement and test rate limiting/abuse controls, then schedule host fallback and expired-room cleanup only after the client heartbeat flow is connected.
-4. Add narrowly scoped realtime access and tests for allowed/denied room access.
-5. Generate typed database definitions and wire the web client to public URL/publishable key only.
-6. Test multi-client realtime, RLS denials, concurrency, reconnects, idempotency, and deletion.
-7. Configure production project/secrets only after security review and explicit project authorization.
+1. Expand database tests for invalid identities, host-only operations, phase transitions, and denied access paths.
+2. Implement and test rate limiting/abuse controls and participant secret lifecycle before public exposure.
+3. Define the browser-side room credential persistence/recovery model and implement the typed RPC client using only the public URL and publishable/anon key.
+4. Add narrowly scoped realtime access and tests for allowed/denied room access before enabling browser subscriptions.
+5. Connect the web client to create/join/snapshot/card/vote/result RPCs, keeping the local prototype usable when backend configuration is absent.
+6. Schedule host fallback and expired-room cleanup only after the client heartbeat flow is connected.
+7. Test multi-client realtime, RLS denials, concurrency, reconnects, idempotency, and deletion; configure a hosted project only after security review and explicit project authorization.
 
 See [official technical references](./references/README.md).
