@@ -45,6 +45,9 @@ begin
   if p_room_code is null or p_participant_id is null or p_participant_secret is null
     or pg_catalog.length(p_participant_secret) <> 64
     or p_category_data is null or pg_catalog.jsonb_typeof(p_category_data) <> 'object'
+    or not (p_category_data ? 'title')
+    or pg_catalog.jsonb_typeof(p_category_data->'title') <> 'string'
+    or pg_catalog.char_length(pg_catalog.btrim(p_category_data->>'title')) not between 1 and 160
     or pg_catalog.octet_length(p_category_data::text) > 16384 then
     raise exception using errcode = '22023', message = 'Invalid card input';
   end if;
@@ -117,6 +120,9 @@ begin
   if p_participant_id is null or p_participant_secret is null or p_card_id is null
     or pg_catalog.length(p_participant_secret) <> 64
     or p_category_data is null or pg_catalog.jsonb_typeof(p_category_data) <> 'object'
+    or not (p_category_data ? 'title')
+    or pg_catalog.jsonb_typeof(p_category_data->'title') <> 'string'
+    or pg_catalog.char_length(pg_catalog.btrim(p_category_data->>'title')) not between 1 and 160
     or pg_catalog.octet_length(p_category_data::text) > 16384 then
     raise exception using errcode = '22023', message = 'Invalid card input';
   end if;

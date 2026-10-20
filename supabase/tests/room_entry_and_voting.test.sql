@@ -1,6 +1,6 @@
 begin;
 
-select plan(17);
+select plan(19);
 
 select has_table('public', 'rooms', 'rooms table exists');
 select has_table('public', 'participants', 'participants table exists');
@@ -50,6 +50,19 @@ select throws_ok(
   'an incorrect participant secret cannot read the room snapshot'
 );
 
+select throws_ok(
+  format(
+    'select public.add_card(%L, %L::uuid, %L, %L::jsonb)',
+    (select payload->>'room_code' from test_host),
+    (select payload->>'participant_id' from test_host),
+    (select payload->>'participant_secret' from test_host),
+    '{"title":" "}'
+  ),
+  '22023',
+  'Invalid card input',
+  'a card must have a non-empty title'
+);
+
 create temporary table test_cards (payload jsonb);
 
 insert into test_cards
@@ -92,6 +105,20 @@ select throws_ok(
   '42501',
   'You can only edit your own cards unless you are the host',
   'a guest cannot edit another participant’s card'
+);
+
+select throws_ok(
+  format(
+    'select public.edit_card(%L, %L::uuid, %L, %L::uuid, %L::jsonb)',
+    (select payload->>'room_code' from test_host),
+    (select payload->>'participant_id' from test_host),
+    (select payload->>'participant_secret' from test_host),
+    (select payload->>'id' from test_cards where payload->>'submitter_participant_id' = (select payload->>'participant_id' from test_host) limit 1),
+    '{"title":""}'
+  ),
+  '22023',
+  'Invalid card input',
+  'card edits must keep a non-empty title'
 );
 
 select throws_ok(
