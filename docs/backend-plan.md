@@ -1,6 +1,6 @@
 # Backend Plan
 
-**Status:** Two versioned migrations are committed. The schema and trusted room-entry RPCs are drafted, but have not been applied to a Supabase project. Card mutation, voting, result resolution, rate limiting, cleanup scheduling, and web integration remain unimplemented.
+**Status:** Three versioned migrations and a pgTAP test script are committed. The schema and initial trusted room/card/voting operations are drafted, but have not been applied to a Supabase project. Tally/result resolution, rate limiting, cleanup scheduling, and web integration remain unimplemented.
 
 ## Responsibilities
 
@@ -26,7 +26,9 @@
 Migrations live in `supabase/migrations/`:
 
 - `20261020190000_initial_room_schema.sql` creates `rooms`, `participants`, `cards`, `voting_rounds`, `ballots`, and `ballot_responses`; adds constraints, indexes, timestamps, same-room foreign keys; enables RLS; and revokes direct table access from `anon` and `authenticated`.
-- `20261020191000_room_entry_rpcs.sql` adds `create_room`, `join_room`, and `get_room_snapshot`. They run with a fixed empty search path, have explicit execute grants, return a room-scoped random participant secret only at creation/join, store only its SHA-256 digest, and verify that secret before returning a snapshot.
+- `20261020191000_room_entry_rpcs.sql` adds `create_room`, `join_room`, and `get_room_snapshot`. It normalizes the pgcrypto extension schema, uses a fixed empty search path, grants execution explicitly, returns a room-scoped random participant secret only at creation/join, stores only its SHA-256 digest, and verifies that secret before returning a snapshot.
+- `20261020192000_card_and_voting_rpcs.sql` adds `add_card`, `edit_card`, `remove_card`, `start_voting`, and `submit_ballot`. These lock the room row for serialized changes, enforce own-card edits and host-only deck lock, enforce card/quota/ballot completeness limits, freeze eligible card IDs at voting start, and reject duplicate ballots.
+- `supabase/tests/room_entry_and_voting.test.sql` adds pgTAP coverage for schema presence, function/table privileges, snapshot identity, deck lock, complete ballot submission, and duplicate ballot rejection.
 
 The room code is currently 12 characters from a 32-symbol ambiguity-reduced alphabet (60 bits of entropy) and is case-normalized. This is a temporary concrete choice, not a final UX decision.
 
@@ -34,7 +36,7 @@ The room code is currently 12 characters from a 32-symbol ambiguity-reduced alph
 
 - These SQL migrations have not been run against PostgreSQL/Supabase. Verify extension/function availability and migration execution in a disposable local Supabase stack first.
 - Creation/join RPCs do not yet implement request rate limits, abuse controls, or a robust per-client creation throttle. Add those before public exposure; room codes are not secrets that replace rate limiting.
-- No RPCs currently mutate cards, lock a deck, submit ballots, calculate results, resolve ties, or close/expire rooms.
+- Result tallying, tie resolution, host disconnect fallback, room closure, expiry cleanup, and trusted contribution-completion operations are not implemented yet.
 - There are no room-scoped realtime authorization policies yet. Direct table access remains revoked; do not connect the browser to the tables or assume realtime synchronization works.
 - The snapshot returns the room's cards after participant-secret verification. It does not expose ballots or vote totals.
 - Secrets are returned only once. Client-side persistence/recovery and token rotation/revocation still need a defined implementation.
@@ -62,9 +64,9 @@ A room code/QR contains the code only; no join URL or deep link is required.
 
 ## Implementation order
 
-1. Add and run migrations in a disposable local Supabase environment; verify constraints and RPC behavior.
+1. Run migrations and pgTAP tests in a disposable local Supabase environment; fix any SQL/runtime failures before proceeding.
 2. Implement and test rate limiting/abuse controls and participant secret lifecycle.
-3. Implement trusted RPCs for contribution edits, host veto, deck lock, ballot submit, tally/tie resolution, host disconnect fallback, and expiry.
+3. Implement trusted RPCs for tally/tie resolution, host disconnect fallback, contribution completion, room closure, and expiry.
 4. Add narrowly scoped realtime access and tests for allowed/denied room access.
 5. Generate typed database definitions and wire the web client to public URL/publishable key only.
 6. Test multi-client realtime, RLS denials, concurrency, reconnects, idempotency, and deletion.
