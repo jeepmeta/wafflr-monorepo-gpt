@@ -51,6 +51,16 @@ Decisions 19–32 are detailed in the [UX decision catalog](./ux-decision-catalo
 
 The current source context did not contain the exact selections for Decisions 1–18. Do not infer or invent them; recover their original records and append them to the catalog.
 
+## Confirmed technical decisions
+
+**Decision: Backend platform — October 20, 2026**
+
+- **Decision:** Use Supabase for PostgreSQL persistence, realtime delivery, and backend functions as needed.
+- **Scope:** This selects the platform, not the final schema or authorization design. No Supabase project or production credentials are configured by this decision.
+- **Reason:** It provides a managed Postgres foundation and realtime capabilities for shared rooms while leaving domain policy in `packages/core` and enforcing sensitive actions at a trusted server/database boundary.
+- **Follow-up:** Finalize room-scoped participant identity, host authorization, RLS policies, migrations, and cleanup before connecting production data.
+- **Status:** Confirmed.
+
 ## High-priority open questions
 
 ### Voting and results
@@ -84,7 +94,7 @@ The current source context did not contain the exact selections for Decisions 1�
 
 - What are the final route names and navigation structure?
 - What colors, typography, logo lockup, mascot expressions, and animation rules are canonical?
-- What backend, database, authentication, real-time transport, hosting, and analytics will be used?
+- Which hosting provider, deployment environments, and privacy-preserving analytics approach will be used?
 - What does offline PWA behavior mean for a live shared room?
 - When should Expo work begin, and which UI components should be shared?
 

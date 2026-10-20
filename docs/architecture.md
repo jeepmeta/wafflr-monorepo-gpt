@@ -10,7 +10,7 @@ Chosen stack: pnpm workspaces, Turborepo, TypeScript, React + Vite, Tailwind CSS
 **apps/mobile:** future Expo / React Native client; reuse core domain rules rather than copying them.
 **packages/core:** platform-neutral domain types, validation, lifecycle rules, deck snapshots, voting policy, tallying, and tie detection once finalized. No React, DOM, browser storage, or React Native imports.
 **packages/ui:** genuinely reusable UI where a cross-platform strategy makes sense. Do not force web-only components into it.
-**packages/config:** shared tooling/configuration where it reduces duplication.
+**packages/config:** the design-token source of truth at `tokens.json`, generated CSS and TypeScript values, and semantic Tailwind CSS v4 aliases. Do not hand-edit generated token outputs.
 
 ## Suggested domain entities
 These are conceptual, not finalized TypeScript definitions:
@@ -27,7 +27,7 @@ Do not finalize structures before deciding identity, persistence, realtime trans
 ## Shared state and synchronization
 The host and guests need a consistent view of submissions and phase. During collection/review, changes are live. At voting start, the active deck is frozen. The authoritative state layer must enforce phase rules; client-side checks alone are not sufficient.
 
-Backend, database, real-time mechanism, hosting, and offline behavior are not selected. Separate domain policy (what is valid), application orchestration (which operation runs), persistence/synchronization (how state is stored and delivered), and presentation (what each screen renders).
+Supabase is the selected backend platform for Postgres persistence and realtime delivery. The project, schema, authorization model, migrations, and hosting provider are not configured yet. Keep domain policy in `packages/core` and enforce sensitive operations at a trusted server/database boundary. Separate domain policy (what is valid), application orchestration (which operation runs), persistence/synchronization (how state is stored and delivered), and presentation (what each screen renders).
 
 ## Conceptual events
 Room creation, participant join, option submit/update/remove, guest completion, review entry, vote start, and vote recording are useful event concepts. Vote start should establish the exact deck snapshot for that round. These are not committed event names and do not require event sourcing.
@@ -38,7 +38,7 @@ Build and validate responsive web/PWA first. Keep decision rules platform-neutra
 Define PWA installability, icons, offline fallback, update behavior, and what happens when a room needs a live connection. Do not pretend shared live voting works offline if state cannot synchronize.
 
 ## Security and privacy
-Room links may grant access to a live group activity; design their access model deliberately. Never commit secrets. Validate important transitions at the authoritative layer. Decide discoverability, link revocation/expiry, identity, vote privacy, and data retention before production.
+Room codes help locate a room but are not authorization credentials. Supabase RLS and trusted functions must enforce access and state transitions. Never commit secrets or expose service-role keys in browser code. Decide room-scoped identity, credential handling, vote privacy, and data retention before production. See [security and data handling](./security-and-data.md).
 
 ## Quality strategy
 Unit-test core rules and tally outcomes; test review-to-voting lock; test live changes across clients; test responsive layout, keyboard and screen-reader operation; verify PWA install/update behavior; add mobile parity checks when Expo is initialized. Run pnpm install, pnpm typecheck, pnpm lint, and pnpm build in a real environment. Earlier starter setup did not yet have verified local install/build results.
