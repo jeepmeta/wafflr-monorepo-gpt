@@ -86,6 +86,12 @@ create table public.voting_rounds (
     references public.cards(room_id, id)
 );
 
+alter table public.rooms
+  add constraint rooms_active_round_same_room_fk
+  foreign key (id, active_round_id)
+  references public.voting_rounds(room_id, id)
+  deferrable initially deferred;
+
 create table public.ballots (
   id uuid primary key default gen_random_uuid(),
   room_id uuid not null,
