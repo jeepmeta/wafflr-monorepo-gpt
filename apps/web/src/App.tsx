@@ -30,7 +30,9 @@ export default function App() {
   const [error, setError] = useState("");
   const [responses, setResponses] = useState<Record<string, VoteValue>>({});
   const [voteIndex, setVoteIndex] = useState(0);
-  const [joinCode, setJoinCode] = useState("");\n  const [confirmStartOpen, setConfirmStartOpen] = useState(false);\n  const [removeCardId, setRemoveCardId] = useState<string | null>(null);
+  const [joinCode, setJoinCode] = useState("");
+  const [confirmStartOpen, setConfirmStartOpen] = useState(false);
+  const [removeCardId, setRemoveCardId] = useState<string | null>(null);
 
   const creatorId = "this-device";
   const activeCards = useMemo(() => {
@@ -170,7 +172,9 @@ export default function App() {
 
       {screen === "winner" && room && <section className="winner-screen"><div className="confetti" aria-hidden="true">✦　✧　✦　✧　✦</div><Butters mood="celebrating" size="lg" /><Badge tone="success">THE GROUP HAS SPOKEN</Badge><h1>It’s a <span>winner!</span></h1><p className="winner-subtitle">No more waffling. Go make it happen.</p><Card className="winner-card"><div className="winner-emoji">{category === "eat" ? "🍕" : category === "watch" ? "🎬" : category === "do" ? "🎉" : "💡"}</div><h2>{room.cards.find((card) => card.id === room.winnerCardId)?.title ?? "Your group’s pick"}</h2><p>{room.cards.find((card) => card.id === room.winnerCardId)?.location}</p><span className="winner-ribbon">WINNER ✨</span></Card><Button size="lg" onClick={() => setScreen("home")}>Back to home</Button><p className="field-note">This is a local prototype; shared real-time rooms are the next integration step.</p></section>}
 
-      <ConfirmDialog open={confirmStartOpen} title="Lock the deck and start voting?" description="Everyone will vote on this exact set of options. You won’t be able to edit the deck after voting starts." confirmLabel="Lock deck & start" onCancel={() => setConfirmStartOpen(false)} onConfirm={() => { setConfirmStartOpen(false); confirmStartVoting(); }} />\n      <ConfirmDialog open={Boolean(removeCardId)} title="Remove this option?" description="This option will be removed from the deck. You can add it again before voting starts." confirmLabel="Remove option" destructive onCancel={() => setRemoveCardId(null)} onConfirm={() => { if (removeCardId) removeCard(removeCardId); setRemoveCardId(null); }} />\n      <footer className="site-footer"><span>🧇 Wafflr</span><span>Stop waffling. Start living.</span><button onClick={() => setError(error ? "" : "Wafflr keeps decisions anonymous. No participant names or individual vote details are shown.")} aria-label="About Wafflr"><CircleHelp size={16} /></button></footer>
+      <ConfirmDialog open={confirmStartOpen} title="Lock the deck and start voting?" description="Everyone will vote on this exact set of options. You won’t be able to edit the deck after voting starts." confirmLabel="Lock deck & start" onCancel={() => setConfirmStartOpen(false)} onConfirm={() => { setConfirmStartOpen(false); confirmStartVoting(); }} />
+      <ConfirmDialog open={Boolean(removeCardId)} title="Remove this option?" description="This option will be removed from the deck. You can add it again before voting starts." confirmLabel="Remove option" destructive onCancel={() => setRemoveCardId(null)} onConfirm={() => { if (removeCardId) removeCard(removeCardId); setRemoveCardId(null); }} />
+      <footer className="site-footer"><span>🧇 Wafflr</span><span>Stop waffling. Start living.</span><button onClick={() => setError(error ? "" : "Wafflr keeps decisions anonymous. No participant names or individual vote details are shown.")} aria-label="About Wafflr"><CircleHelp size={16} /></button></footer>
       {error && screen !== "room" && screen !== "vote" && screen !== "tie" && screen !== "join" && <p className="toast-message" role="status">{error}<button onClick={() => setError("")} aria-label="Dismiss"><X size={14} /></button></p>}
     </main>
   );
