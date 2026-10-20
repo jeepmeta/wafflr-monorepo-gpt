@@ -70,7 +70,7 @@ select public.add_card(
   (select payload->>'room_code' from test_host),
   ((select payload->>'participant_id' from test_host)::uuid),
   (select payload->>'participant_secret' from test_host),
-  '{"name":"Pasta place"}'::jsonb
+  '{"title":"Pasta place"}'::jsonb
 );
 
 insert into test_cards
@@ -78,7 +78,7 @@ select public.add_card(
   (select payload->>'room_code' from test_guest),
   ((select payload->>'participant_id' from test_guest)::uuid),
   (select payload->>'participant_secret' from test_guest),
-  '{"name":"Taco place"}'::jsonb
+  '{"title":"Taco place"}'::jsonb
 );
 
 select lives_ok(

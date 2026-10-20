@@ -15,7 +15,7 @@ select public.add_card(
   (select payload->>'room_code' from test_host),
   ((select payload->>'participant_id' from test_host)::uuid),
   (select payload->>'participant_secret' from test_host),
-  '{"name":"Movie A"}'::jsonb
+  '{"title":"Movie A"}'::jsonb
 );
 
 insert into test_cards
@@ -23,7 +23,7 @@ select public.add_card(
   (select payload->>'room_code' from test_guest),
   ((select payload->>'participant_id' from test_guest)::uuid),
   (select payload->>'participant_secret' from test_guest),
-  '{"name":"Movie B"}'::jsonb
+  '{"title":"Movie B"}'::jsonb
 );
 
 create temporary table round_one as

@@ -9,14 +9,14 @@ insert into public.cards (room_id, submitter_participant_id, category_data, posi
 select
   (select id from public.rooms where room_code = (select payload->>'room_code' from test_host)),
   ((select payload->>'participant_id' from test_host)::uuid),
-  '{"name":"Option A"}'::jsonb,
+  '{"title":"Option A"}'::jsonb,
   0;
 
 insert into public.cards (room_id, submitter_participant_id, category_data, position)
 select
   (select id from public.rooms where room_code = (select payload->>'room_code' from test_host)),
   ((select payload->>'participant_id' from test_host)::uuid),
-  '{"name":"Option B"}'::jsonb,
+  '{"title":"Option B"}'::jsonb,
   1;
 
 create temporary table test_round as
