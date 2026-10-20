@@ -1,6 +1,6 @@
 begin;
 
-select plan(15);
+select plan(17);
 
 select has_table('public', 'rooms', 'rooms table exists');
 select has_table('public', 'participants', 'participants table exists');
@@ -66,6 +66,32 @@ select public.add_card(
   ((select payload->>'participant_id' from test_guest)::uuid),
   (select payload->>'participant_secret' from test_guest),
   '{"name":"Taco place"}'::jsonb
+);
+
+select lives_ok(
+  format(
+    'select public.edit_card(%L, %L::uuid, %L, %L::uuid, %L::jsonb)',
+    (select payload->>'room_code' from test_host),
+    (select payload->>'participant_id' from test_host),
+    (select payload->>'participant_secret' from test_host),
+    (select payload->>'id' from test_cards order by payload->>'id' limit 1),
+    '{"title":"Host reviewed option"}'
+  ),
+  'the host can edit a card during final deck review'
+);
+
+select throws_ok(
+  format(
+    'select public.edit_card(%L, %L::uuid, %L, %L::uuid, %L::jsonb)',
+    (select payload->>'room_code' from test_host),
+    (select payload->>'participant_id' from test_guest),
+    (select payload->>'participant_secret' from test_guest),
+    (select payload->>'id' from test_cards order by payload->>'id' limit 1),
+    '{"title":"Unauthorized edit"}'
+  ),
+  '42501',
+  'You can only edit your own cards unless you are the host',
+  'a guest cannot edit another participant’s card'
 );
 
 select throws_ok(

@@ -137,11 +137,11 @@ begin
     set category_data = p_category_data
     where room_id = v_room.id
       and id = p_card_id
-      and submitter_participant_id = v_participant.id
+      and (submitter_participant_id = v_participant.id or v_participant.role = 'host')
     returning * into v_card;
 
   if not found then
-    raise exception using errcode = '42501', message = 'You can only edit your own cards';
+    raise exception using errcode = '42501', message = 'You can only edit your own cards unless you are the host';
   end if;
 
   return pg_catalog.jsonb_build_object(

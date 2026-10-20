@@ -1,6 +1,6 @@
 # Backend Plan
 
-**Status:** Six versioned migrations pass clean local Supabase CI, including 29 pgTAP assertions. The web app now has an opt-in RPC-backed shared-room MVP for create/join, card contribution, voting, and result/tie flow. No hosted Supabase project is connected yet. Rate limiting, scheduled cleanup/fallback execution, and room-scoped realtime authorization remain unimplemented.
+**Status:** Six versioned migrations pass clean local Supabase CI, including 31 pgTAP assertions. The web app now has an opt-in RPC-backed shared-room MVP for create/join, card contribution, voting, and result/tie flow. No hosted Supabase project is connected yet. Rate limiting, scheduled cleanup/fallback execution, and room-scoped realtime authorization remain unimplemented.
 
 ## Responsibilities
 
@@ -27,7 +27,7 @@ Migrations live in `supabase/migrations/`:
 
 - `20261020190000_initial_room_schema.sql` creates `rooms`, `participants`, `cards`, `voting_rounds`, `ballots`, and `ballot_responses`; adds constraints, indexes, timestamps, same-room foreign keys; enables RLS; and revokes direct table access from `anon` and `authenticated`.
 - `20261020191000_room_entry_rpcs.sql` adds `create_room`, `join_room`, and `get_room_snapshot`. It normalizes the pgcrypto extension schema, uses a fixed empty search path, grants execution explicitly, returns a room-scoped random participant secret only at creation/join, stores only its SHA-256 digest, and verifies that secret before returning a snapshot.
-- `20261020192000_card_and_voting_rpcs.sql` adds `add_card`, `edit_card`, `remove_card`, `start_voting`, and `submit_ballot`. These lock the room row for serialized changes, enforce own-card edits and host-only deck lock, enforce card/quota/ballot completeness limits, freeze eligible card IDs at voting start, and reject duplicate ballots.
+- `20261020192000_card_and_voting_rpcs.sql` adds `add_card`, `edit_card`, `remove_card`, `start_voting`, and `submit_ballot`. These lock the room row for serialized changes, enforce own-card edits, host deck review edits, and host-only deck lock, enforce card/quota/ballot completeness limits, freeze eligible card IDs at voting start, and reject duplicate ballots.
 - `20261020193000_result_resolution_rpcs.sql` adds early-end grace, server-derived tallies, winner/tie resolution, one tie-breaker round, host-selected winners, unresolved-tie closure, result retrieval, and room closure with a 24-hour expiry timestamp.
 - `20261020194000_contribution_and_lifecycle_rpcs.sql` adds `finish_contribution`, participant heartbeat, and a batch expiry-deletion function callable only by `service_role`.
 - `20261020195000_host_disconnect_fallback.sql` adds a `service_role`-only operation to resolve rooms whose host heartbeat is stale by more than ten minutes, using submitted ballots or a random eligible card if there are no ballots.
