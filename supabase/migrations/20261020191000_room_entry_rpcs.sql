@@ -63,8 +63,11 @@ begin
 
   loop
     v_attempt := v_attempt + 1;
-    -- Ten random hexadecimal characters provide 40 bits of locator entropy.
-    v_room_code := pg_catalog.upper(pg_catalog.substr(pg_catalog.replace(pg_catalog.gen_random_uuid()::text, '-', ''), 1, 10));
+    -- Twelve characters from a 32-symbol alphabet provide 60 bits of locator entropy.
+    v_room_code := '';
+    for i in 1..12 loop
+      v_room_code := v_room_code || pg_catalog.substr(v_alphabet, 1 + pg_catalog.get_byte(extensions.gen_random_bytes(1), 0) % pg_catalog.length(v_alphabet), 1);
+    end loop;
 
     begin
       insert into public.rooms (room_code, title, category, contribution_mode, cards_per_participant)
