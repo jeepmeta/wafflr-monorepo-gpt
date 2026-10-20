@@ -20,6 +20,7 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: 10.18.1
+      # Do not enable setup-node's pnpm cache until pnpm-lock.yaml is committed.
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
