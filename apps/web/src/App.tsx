@@ -17,6 +17,7 @@ const newId = () => globalThis.crypto?.randomUUID?.() ?? `id-${Date.now()}-${Mat
 export default function App() {
   const [screen, setScreen] = useState<Screen>("home");
   const [category, setCategory] = useState<DecisionCategory>("eat");
+  const [roomTitle, setRoomTitle] = useState("");
   const [mode, setMode] = useState<"creator-only" | "guests-contribute">("guests-contribute");
   const [quota, setQuota] = useState<1 | 2 | 3>(2);
   const [room, setRoom] = useState<DecisionRoom | null>(null);
@@ -35,12 +36,14 @@ export default function App() {
   }, [room]);
 
   function beginSetup() {
-    setRoom(null); setDraft(blankCard()); setError(""); setCategory("eat"); setMode("guests-contribute"); setQuota(2); setScreen("setup");
+    setRoom(null); setDraft(blankCard()); setError(""); setCategory("eat"); setRoomTitle(""); setMode("guests-contribute"); setQuota(2); setScreen("setup");
   }
 
   function createNewRoom() {
-    const next = createRoom({ id: newId(), code: Math.random().toString(36).slice(2, 8).toUpperCase(), creatorId, category, contributionMode: mode, cardLimitPerGuest: quota, now: Date.now() });
-    setRoom(next); setScreen("room");
+    const title = roomTitle.trim();
+    if (!title) { setError("Give your decision a title first."); return; }
+    const next = createRoom({ id: newId(), code: Math.random().toString(36).slice(2, 8).toUpperCase(), title, creatorId, category, contributionMode: mode, cardLimitPerGuest: quota, now: Date.now() });
+    setRoom(next); setError(""); setScreen("room");
   }
 
   const myCardCount = room?.cards.filter((card) => card.submittedBy === creatorId).length ?? 0;
@@ -160,6 +163,7 @@ export default function App() {
       {screen === "setup" && <section className="workflow-screen">
         <Button variant="quiet" leadingIcon={<ArrowLeft size={17} />} onClick={() => setScreen("home")}>Back home</Button>
         <SectionHeading eyebrow="STEP 1 OF 2" title="What are we deciding?" description="One room, one decision. Keep it simple." />
+        <div className="room-title-field"><TextField label="Give your decision a title" value={roomTitle} onChange={(event) => setRoomTitle(event.target.value.slice(0, 80))} placeholder={category === "eat" ? "e.g. Where should we eat?" : category === "watch" ? "e.g. Movie night pick" : category === "do" ? "e.g. Saturday plans" : "e.g. Help us decide"} maxLength={80} required /><span className="field-note">Make it easy for everyone to know what this room is for.</span></div>
         <div className="category-grid">{categories.map((item) => { const Icon = item.icon; return <button key={item.id} className={`category-choice ${category === item.id ? "is-selected" : ""}`} onClick={() => setCategory(item.id)}><span className="category-icon"><Icon size={22} /></span><span className="category-title">{item.title}</span><span className="category-subtitle">{item.subtitle}</span>{category === item.id && <span className="selected-check"><Check size={14} /></span>}</button>; })}</div>
         <SectionHeading eyebrow="STEP 2 OF 2" title="Who’s adding options?" description="The creator is a regular participant, too." />
         <div className="mode-grid">
@@ -167,15 +171,15 @@ export default function App() {
           <button className={`mode-choice ${mode === "guests-contribute" ? "is-selected" : ""}`} onClick={() => setMode("guests-contribute")}><span className="mode-emoji">🙌</span><strong>Let everyone contribute</strong><span>Everyone can add their own options before voting.</span></button>
         </div>
         {mode === "guests-contribute" && <div className="quota-row"><div><strong>Cards per guest</strong><p>Unused slots are fine. Nobody gets stuck.</p></div><div className="quota-picker">{([1,2,3] as const).map((n) => <button key={n} className={quota === n ? "active" : ""} onClick={() => setQuota(n)} aria-pressed={quota === n}>{n}</button>)}</div></div>}
-        <div className="workflow-footer"><span>Room limit: 100 cards total</span><Button size="lg" trailingIcon={<ArrowRight size={18} />} onClick={createNewRoom}>Create room</Button></div>
+        {error && <p className="inline-error" role="alert">{error}</p>}<div className="workflow-footer"><span>Room limit: 100 cards total</span><Button size="lg" trailingIcon={<ArrowRight size={18} />} onClick={createNewRoom}>Create room</Button></div>
       </section>}
 
-      {screen === "review" && room && <section className="workflow-screen deck-review-screen"><Button variant="quiet" leadingIcon={<ArrowLeft size={17} />} onClick={() => setScreen("room")}>Back to deck</Button><SectionHeading eyebrow="FINAL DECK REVIEW" title="Looking good?" description="Give the deck one last look. You can edit or remove any option before the group starts voting." action={<Badge>{room.cards.length}/100 cards</Badge>} /><div className="review-card-grid">{room.cards.map((card, index) => <Card className="review-card" key={card.id}><div className="option-card-top"><span className="option-number">{String(index + 1).padStart(2, "0")}</span><div className="option-card-controls"><button className="remove-option" onClick={() => editCard(card.id)} aria-label={`Edit ${card.title}`} title="Edit this card"><span aria-hidden="true">✎</span></button><button className="remove-option" onClick={() => removeCard(card.id)} aria-label={`Remove ${card.title}`} title="Remove this card"><X size={16} /></button></div></div><div className="option-emoji">{category === "eat" ? ["🍕","🍜","🌮","🍔","🥗"][index % 5] : category === "watch" ? "🎬" : category === "do" ? "🎯" : "💡"}</div><h3>{card.title}</h3>{card.category && <span className="option-meta">{card.category}</span>}{card.location && <p className="option-location">{card.location}</p>}</Card>)}</div>{error && <p className="inline-error" role="alert">{error}</p>}<div className="workflow-footer sticky-footer"><span>{room.cards.length < 2 ? "Add at least two options before voting." : "Once voting starts, this deck is locked."}</span><div className="review-actions"><Button variant="secondary" onClick={() => setScreen("room")}>Add more options</Button><Button size="lg" trailingIcon={<ArrowRight size={18} />} disabled={!canStartVoting(room)} onClick={confirmStartVoting}>Lock deck & start voting</Button></div></div></section>}
+      {screen === "review" && room && <section className="workflow-screen deck-review-screen"><Button variant="quiet" leadingIcon={<ArrowLeft size={17} />} onClick={() => setScreen("room")}>Back to deck</Button><SectionHeading eyebrow="FINAL DECK REVIEW" title={room.title} description="Give the deck one last look. You can edit or remove any option before the group starts voting." action={<Badge>{room.cards.length}/100 cards</Badge>} /><div className="review-card-grid">{room.cards.map((card, index) => <Card className="review-card" key={card.id}><div className="option-card-top"><span className="option-number">{String(index + 1).padStart(2, "0")}</span><div className="option-card-controls"><button className="remove-option" onClick={() => editCard(card.id)} aria-label={`Edit ${card.title}`} title="Edit this card"><span aria-hidden="true">✎</span></button><button className="remove-option" onClick={() => removeCard(card.id)} aria-label={`Remove ${card.title}`} title="Remove this card"><X size={16} /></button></div></div><div className="option-emoji">{category === "eat" ? ["🍕","🍜","🌮","🍔","🥗"][index % 5] : category === "watch" ? "🎬" : category === "do" ? "🎯" : "💡"}</div><h3>{card.title}</h3>{card.category && <span className="option-meta">{card.category}</span>}{card.location && <p className="option-location">{card.location}</p>}</Card>)}</div>{error && <p className="inline-error" role="alert">{error}</p>}<div className="workflow-footer sticky-footer"><span>{room.cards.length < 2 ? "Add at least two options before voting." : "Once voting starts, this deck is locked."}</span><div className="review-actions"><Button variant="secondary" onClick={() => setScreen("room")}>Add more options</Button><Button size="lg" trailingIcon={<ArrowRight size={18} />} disabled={!canStartVoting(room)} onClick={confirmStartVoting}>Lock deck & start voting</Button></div></div></section>}
 
       {screen === "room" && room && <section className="workflow-screen">
         <div className="room-topline"><Button variant="quiet" leadingIcon={<ArrowLeft size={17} />} onClick={() => setScreen("home")}>Home</Button><Badge tone="success">Room created</Badge></div>
         <div className="room-code-card"><div><span className="eyebrow">YOUR ROOM CODE</span><strong>{room.code}</strong><p>Share this code with your crew. QR sharing arrives with room sync.</p></div><Button variant="secondary" size="sm" leadingIcon={<Copy size={15} />} onClick={copyCode}>Copy code</Button></div>
-        <SectionHeading eyebrow="BUILD THE DECK" title="What are the options?" description="Add the choices your group could be happy with. You can veto cards before voting starts." action={<Badge>{room.cards.length}/100 cards</Badge>} />
+        <SectionHeading eyebrow="BUILD THE DECK" title={room.title} description="Add the choices your group could be happy with. You can edit or remove options before voting starts." action={<Badge>{room.cards.length}/100 cards</Badge>} />
         <div className="add-card-panel">
           <div className="add-card-fields"><TextField label={category === "eat" ? "Restaurant or option name" : "Option name"} value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} placeholder={category === "eat" ? "e.g. Noodle House" : "e.g. Movie night"} onKeyDown={(event) => { if (event.key === "Enter") addCard(); }} /><div className="optional-fields">{category === "eat" && <TextField label="Cuisine / category" value={draft.category} onChange={(event) => setDraft({ ...draft, category: event.target.value })} placeholder="e.g. Thai" /> }<TextField label={category === "eat" ? "Location (optional)" : "Extra detail (optional)"} value={draft.location} onChange={(event) => setDraft({ ...draft, location: event.target.value })} placeholder={category === "eat" ? "Neighborhood or address" : "A little context"} /></div></div>
           <div className="add-card-actions"><Button leadingIcon={<Plus size={17} />} onClick={addCard} disabled={!editCardId && (room.cards.length >= 100 || contributionFull)}>{editCardId ? "Save changes" : "Add option"}</Button>{editCardId && <Button variant="quiet" onClick={cancelCardEdit}>Cancel</Button>}</div>
