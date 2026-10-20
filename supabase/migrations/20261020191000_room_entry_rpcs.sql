@@ -1,3 +1,25 @@
+-- Ensure pgcrypto functions are available in the schema used by trusted RPCs.
+-- Supabase commonly preinstalls this extension in `extensions`; local PostgreSQL
+-- installations may initially place it in `public`.
+create schema if not exists extensions;
+
+do $migration$
+declare
+  v_extension_schema text;
+begin
+  select n.nspname into v_extension_schema
+  from pg_catalog.pg_extension e
+  join pg_catalog.pg_namespace n on n.oid = e.extnamespace
+  where e.extname = 'pgcrypto';
+
+  if v_extension_schema is null then
+    execute 'create extension pgcrypto with schema extensions';
+  elsif v_extension_schema <> 'extensions' then
+    execute 'alter extension pgcrypto set schema extensions';
+  end if;
+end;
+$migration$;
+
 -- Trusted entry points for room creation, joining, and room-scoped reads.
 -- All mutations run as the database owner but validate their inputs and identity.
 -- Do not add broad table grants: clients interact through these RPCs only.
