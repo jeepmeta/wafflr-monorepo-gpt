@@ -44,6 +44,21 @@ The room code is currently 12 characters from a 32-symbol ambiguity-reduced alph
 - The snapshot returns the room's cards after participant-secret verification. It does not expose ballots or vote totals.
 - Secrets are returned only once. Client-side persistence/recovery and token rotation/revocation still need a defined implementation.
 
+## Local database verification
+
+The repository now includes `supabase/config.toml` and a dedicated `database-tests` job in `.github/workflows/ci.yml`. On pushes to `main` and pull requests, CI starts a disposable local Supabase stack, applies the migrations from a clean database, and runs the pgTAP files under `supabase/tests/`.
+
+To run the same checks locally, install Docker and the Supabase CLI, then run:
+
+```sh
+supabase start -x studio,inbucket,edge-runtime,logflare,vector
+supabase db reset --local
+supabase test db --local
+supabase stop
+```
+
+The first successful CI run is the verification gate; adding the workflow does not itself prove the SQL passes. Review the database job output and fix any migration/test failures before treating these RPCs as ready for integration. The existing web build job and the database job validate separate parts of the repository.
+
 ## Conceptual data model
 
 | Entity | Purpose |
