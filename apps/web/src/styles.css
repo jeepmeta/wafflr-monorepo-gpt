@@ -197,3 +197,11 @@ button:disabled { cursor:not-allowed; }
   .room-code-actions { width:100%; }
   .room-code-actions > * { flex:1; }
 }
+
+
+/* Shared aggregate vote results */
+.results-tally { width: min(100%, 560px); margin: 1.25rem auto; padding: 1rem; border: 1px solid var(--line, #eadfd5); border-radius: 1rem; background: var(--surface, #fff); text-align: left; }
+.results-tally h2 { margin: 0 0 .65rem; font-size: 1rem; }
+.results-tally-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .7rem 0; border-top: 1px solid var(--line, #eadfd5); }
+.results-tally-row span { overflow-wrap: anywhere; }
+.results-tally-row strong { flex: 0 0 auto; color: var(--ink, #30231d); font-variant-numeric: tabular-nums; }
