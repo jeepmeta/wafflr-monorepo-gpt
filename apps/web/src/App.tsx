@@ -4,6 +4,7 @@ import { JoinScreen } from "./screens/JoinScreen";
 import { SetupScreen } from "./screens/SetupScreen";
 import { ReviewScreen } from "./screens/ReviewScreen";
 import { BallotReviewScreen } from "./screens/BallotReviewScreen";
+import { WinnerScreen } from "./screens/WinnerScreen";
 import { ConfirmDialog } from "./components/Modal";
 import { ArrowLeft, ArrowRight, Check, CircleHelp, Clapperboard, Copy, Footprints, Plus, Sparkles, Trash2, Utensils, Users, WandSparkles, X } from "lucide-react";
 import { applyRoomAction, canStartVoting, createRoom, resolveCurrentRound, type DecisionCategory, type DecisionRoom, type VoteValue } from "@wafflr/core";
@@ -172,7 +173,7 @@ export default function App() {
 
       {screen === "choose-winner" && room && <section className="workflow-screen"><div className="vote-intro"><Butters mood="thinking" size="md" /><h1>{room.phase === "tie-breaker" ? "Still tied!" : "Let’s pick one."}</h1><p>{room.phase === "tie-breaker" ? "One last call. Tap the option that wins for your group." : "Voting ended before anyone submitted. Choose a card to keep things moving."}</p></div><div className="winner-choice-grid">{activeCards.map((card, index) => <button key={card.id} className="winner-choice" onClick={() => chooseWinner(card.id)}><span>{category === "eat" ? ["🍕","🍜","🌮","🍔","🥗"][index % 5] : category === "watch" ? "🎬" : category === "do" ? "🎯" : "💡"}</span><strong>{card.title}</strong><small>Choose winner <ArrowRight size={14} /></small></button>)}</div></section>}
 
-      {screen === "winner" && room && <section className="winner-screen"><div className="confetti" aria-hidden="true">✦　✧　✦　✧　✦</div><Butters mood="celebrating" size="lg" /><Badge tone="success">THE GROUP HAS SPOKEN</Badge><h1>It’s a <span>winner!</span></h1><p className="winner-subtitle">No more waffling. Go make it happen.</p><Card className="winner-card"><div className="winner-emoji">{category === "eat" ? "🍕" : category === "watch" ? "🎬" : category === "do" ? "🎉" : "💡"}</div><h2>{room.cards.find((card) => card.id === room.winnerCardId)?.title ?? "Your group’s pick"}</h2><p>{room.cards.find((card) => card.id === room.winnerCardId)?.location}</p><span className="winner-ribbon">WINNER ✨</span></Card><Button size="lg" onClick={() => setScreen("home")}>Back to home</Button><p className="field-note">This is a local prototype; shared real-time rooms are the next integration step.</p></section>}
+      {screen === "winner" && room && <WinnerScreen room={room} category={category} onHome={() => setScreen("home")} />}
 
       <ConfirmDialog open={confirmStartOpen} title="Lock the deck and start voting?" description="Everyone will vote on this exact set of options. You won’t be able to edit the deck after voting starts." confirmLabel="Lock deck & start" onCancel={() => setConfirmStartOpen(false)} onConfirm={() => { setConfirmStartOpen(false); confirmStartVoting(); }} />
       <ConfirmDialog open={Boolean(removeCardId)} title="Remove this option?" description="This option will be removed from the deck. You can add it again before voting starts." confirmLabel="Remove option" destructive onCancel={() => setRemoveCardId(null)} onConfirm={() => { if (removeCardId) removeCard(removeCardId); setRemoveCardId(null); }} />
