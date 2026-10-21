@@ -3,6 +3,7 @@ import { HomeScreen } from "./screens/HomeScreen";
 import { JoinScreen } from "./screens/JoinScreen";
 import { SetupScreen } from "./screens/SetupScreen";
 import { ReviewScreen } from "./screens/ReviewScreen";
+import { BallotReviewScreen } from "./screens/BallotReviewScreen";
 import { ConfirmDialog } from "./components/Modal";
 import { ArrowLeft, ArrowRight, Check, CircleHelp, Clapperboard, Copy, Footprints, Plus, Sparkles, Trash2, Utensils, Users, WandSparkles, X } from "lucide-react";
 import { applyRoomAction, canStartVoting, createRoom, resolveCurrentRound, type DecisionCategory, type DecisionRoom, type VoteValue } from "@wafflr/core";
@@ -160,7 +161,7 @@ export default function App() {
         <div className="workflow-footer sticky-footer"><span>{room.contributionMode === "guests-contribute" ? `Your cards: ${myCardCount}/${room.cardLimitPerGuest} · ` : ""}{room.cards.length < 2 ? `Add ${2 - room.cards.length} more option${2 - room.cards.length === 1 ? "" : "s"} to start` : "Deck ready when you are"}</span><Button size="lg" trailingIcon={<ArrowRight size={18} />} disabled={!canStartVoting(room)} onClick={startVoting}>Review deck & vote</Button></div>
       </section>}
 
-      {screen === "ballot-review" && room && <section className="workflow-screen ballot-review-screen"><Button variant="quiet" leadingIcon={<ArrowLeft size={17} />} onClick={() => setScreen(room.phase === "tie-breaker" ? "tie" : "vote")}>Back to voting</Button><div className="vote-intro"><Butters mood="thinking" size="md" /><h1>One last look.</h1><p>Make sure your Yup and Nah choices feel right. You can still change any answer before submitting.</p></div><div className="ballot-review-list">{activeCards.map((card, index) => <div className="ballot-review-row" key={card.id}><span className="ballot-review-emoji">{category === "eat" ? ["🍕","🍜","🌮","🍔","🥗"][room.cards.findIndex((item) => item.id === card.id) % 5] : category === "watch" ? "🎬" : category === "do" ? "🎯" : "💡"}</span><div className="ballot-review-copy"><strong>{card.title}</strong><span>{card.location || card.category || "Your choice"}</span></div><Badge tone={responses[card.id] === "yup" ? "success" : "danger"}>{responses[card.id] === "yup" ? "♥ Yup" : "✕ Nah"}</Badge><Button size="sm" variant="secondary" onClick={() => { setVoteIndex(index); setScreen(room.phase === "tie-breaker" ? "tie" : "vote"); }}>Change</Button></div>)}</div>{error && <p className="inline-error" role="alert">{error}</p>}<div className="workflow-footer"><span>{activeCards.length} answers · one submission</span><Button size="lg" onClick={submitVotes}>Confirm and submit votes <ArrowRight size={17} /></Button></div></section>}
+      {screen === "ballot-review" && room && <BallotReviewScreen room={room} category={category} cards={activeCards} responses={responses} error={error} onBack={() => setScreen(room.phase === "tie-breaker" ? "tie" : "vote")} onChangeVote={(index) => { setVoteIndex(index); setScreen(room.phase === "tie-breaker" ? "tie" : "vote"); }} onSubmit={submitVotes} />}
 
       {(screen === "vote" || screen === "tie") && room && <section className="voting-screen">
         <div className="voting-top"><Badge tone="warning">{screen === "tie" ? "TIE-BREAKER" : "YOUR TURN"}</Badge><span>{Math.min(voteIndex + 1, activeCards.length)} of {activeCards.length}</span></div>
