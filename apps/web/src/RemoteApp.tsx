@@ -96,7 +96,7 @@ export default function RemoteApp() {
       const next = await backend.snapshot(identity);
       setSnapshot(next);
       setRoomHistory(current => {
-        const updated = current.map(room => room.room_id === next.room_id ? { ...room, title: next.title, category: next.category, room_icon: next.room_icon, phase: next.phase, contribution_mode: next.contribution_mode, cards_per_participant: next.cards_per_participant } : room);
+        const updated = current.map(room => room.room_id === next.room_id ? { ...room, title: next.title, category: next.category, room_icon: next.room_icon, expires_at: next.expires_at, phase: next.phase, contribution_mode: next.contribution_mode, cards_per_participant: next.cards_per_participant } : room);
         try { localStorage.setItem(historyKey, JSON.stringify(updated)); } catch { /* local history may be disabled */ }
         return updated;
       });

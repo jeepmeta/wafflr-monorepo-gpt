@@ -25,3 +25,5 @@
  .your-room-actions { align-items:stretch; }
 }
 @media (prefers-reduced-motion:reduce) { .room-icon-picker button { transition:none; } .room-icon-picker button:hover { transform:none; } }
+
+.room-history-status.is-expired { background:#fbe6e6; color:#9a3030; }
