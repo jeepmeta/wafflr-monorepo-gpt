@@ -152,7 +152,7 @@ export default function App() {
 
       {screen === "home" && <HomeScreen onCreate={beginSetup} onJoin={() => { setError(""); setScreen("join"); }} onYourRooms={() => setScreen("your-rooms")} />}
 
-      {screen === "your-rooms" && <YourRoomsScreen rooms={rooms} onBack={() => setScreen("home")} onOpen={(selectedRoom) => { setRoom(selectedRoom); setScreen(selectedRoom.phase === "winner" ? "winner" : selectedRoom.phase === "voting" ? "vote" : selectedRoom.phase === "tie-breaker" ? "tie" : "room"); }} />
+      {screen === "your-rooms" && <YourRoomsScreen rooms={rooms} onBack={() => setScreen("home")} onOpen={(selectedRoom) => { setRoom(selectedRoom); setScreen(selectedRoom.phase === "winner" ? "winner" : selectedRoom.phase === "voting" ? "vote" : selectedRoom.phase === "tie-breaker" ? "tie" : "room"); }} />}
 
       {screen === "join" && <JoinScreen code={joinCode} onCodeChange={setJoinCode} error={error} onBack={() => setScreen("home")} onContinue={() => setError("Live room joining needs the shared room service, which is not connected yet.")} />}
 
