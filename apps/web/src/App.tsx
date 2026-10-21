@@ -8,7 +8,9 @@ import { WinnerScreen } from "./screens/WinnerScreen";
 import { VoteScreen } from "./screens/VoteScreen";
 import { TieResolutionScreen } from "./screens/TieResolutionScreen";
 import { YourRoomsScreen } from "./screens/YourRoomsScreen";
-import { ConfirmDialog } from "./components/Modal";
+import { ConfirmDialog, Modal } from "./components/Modal";
+import { Toast } from "./components/Toast";
+import { useToast } from "./hooks/useToast";
 import { ArrowLeft, ArrowRight, Check, CircleHelp, Clapperboard, Copy, Footprints, Plus, Sparkles, Trash2, Utensils, Users, WandSparkles, X } from "lucide-react";
 import { applyRoomAction, canStartVoting, createRoom, resolveCurrentRound, type DecisionCategory, type DecisionRoom, type VoteValue } from "@wafflr/core";
 import { Badge, Butters, Button, Card, EmptyState, SectionHeading, TextField } from "@wafflr/ui";
@@ -40,6 +42,8 @@ export default function App() {
   const [joinCode, setJoinCode] = useState("");
   const [confirmStartOpen, setConfirmStartOpen] = useState(false);
   const [removeCardId, setRemoveCardId] = useState<string | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
+  const { toast, show: showToast, dismiss: dismissToast } = useToast();
 
   const creatorId = "this-device";
 
@@ -80,7 +84,7 @@ export default function App() {
     if (room.cards.length >= 100) { setError("Room full — 100/100 cards."); return; }
     const result = applyRoomAction(room, { type: "add-card", card: { id: newId(), title, category: draft.category.trim() || undefined, location: draft.location.trim() || undefined, submittedBy: creatorId, createdAt: Date.now() } });
     if (!result.ok) { setError(result.error === "card-limit-reached" ? "Room full — 100/100 cards." : result.error === "contribution-limit-reached" ? "You’ve added all your cards for this room." : "Couldn’t add that option. Try again."); return; }
-    setRoom(result.room); setDraft(blankCard()); setError("");
+    setRoom(result.room); setDraft(blankCard()); setError(""); showToast(editCardId ? "Option updated." : "Option added to the deck.", "success");
   }
 
   function editCard(cardId: string) {
@@ -96,7 +100,7 @@ export default function App() {
   function removeCard(cardId: string) {
     if (!room) return;
     const result = applyRoomAction(room, { type: "creator-veto-card", cardId, participantId: creatorId });
-    if (result.ok) setRoom(result.room);
+    if (result.ok) { setRoom(result.room); showToast("Option removed.", "success"); }
   }
 
   function startVoting() {
@@ -140,7 +144,22 @@ export default function App() {
   }
 
   function copyCode() {
-    if (room?.code && navigator.clipboard) void navigator.clipboard.writeText(room.code);
+    if (!room?.code) return;
+    if (!navigator.clipboard) { showToast("Clipboard access isn’t available in this browser.", "error"); return; }
+    void navigator.clipboard.writeText(room.code)
+      .then(() => showToast("Room code copied.", "success"))
+      .catch(() => showToast("Couldn’t copy the code. You can select it and copy manually.", "error"));
+  }
+
+  function shareCode() {
+    if (!room?.code) return;
+    if (navigator.share) {
+      void navigator.share({ title: `Join ${room.title} on Wafflr`, text: `Join my Wafflr room with code ${room.code}` })
+        .then(() => showToast("Room code shared.", "success"))
+        .catch((error: unknown) => { if (!(error instanceof DOMException && error.name === "AbortError")) showToast("Sharing wasn’t available. Try copying the room code.", "info"); });
+      return;
+    }
+    copyCode();
   }
 
   return (
@@ -181,10 +200,20 @@ export default function App() {
 
       {screen === "winner" && room && <WinnerScreen room={room} category={category} onHome={() => setScreen("home")} />}
 
+      <Modal open={shareOpen} title="Share your room" description="Invite your crew to join the decision. No account or name needed." onClose={() => setShareOpen(false)}>
+        <div className="share-room-content">
+          <span className="eyebrow">ROOM CODE</span>
+          <strong className="share-room-code">{room?.code ?? "—"}</strong>
+          <p>Send this code to your group. They can enter it from the Join a room screen.</p>
+          <div className="wf-modal-actions"><Button variant="secondary" onClick={copyCode}>Copy code</Button><Button onClick={shareCode}>Share code</Button></div>
+          <p className="field-note">QR and live room links will be available when shared-room joining is connected.</p>
+        </div>
+      </Modal>
       <ConfirmDialog open={confirmStartOpen} title="Lock the deck and start voting?" description="Everyone will vote on this exact set of options. You won’t be able to edit the deck after voting starts." confirmLabel="Lock deck & start" onCancel={() => setConfirmStartOpen(false)} onConfirm={() => { setConfirmStartOpen(false); confirmStartVoting(); }} />
       <ConfirmDialog open={Boolean(removeCardId)} title="Remove this option?" description="This option will be removed from the deck. You can add it again before voting starts." confirmLabel="Remove option" destructive onCancel={() => setRemoveCardId(null)} onConfirm={() => { if (removeCardId) removeCard(removeCardId); setRemoveCardId(null); }} />
       <footer className="site-footer"><span>🧇 Wafflr</span><span>Stop waffling. Start living.</span><button onClick={() => setError(error ? "" : "Wafflr keeps decisions anonymous. No participant names or individual vote details are shown.")} aria-label="About Wafflr"><CircleHelp size={16} /></button></footer>
       {error && screen !== "room" && screen !== "vote" && screen !== "tie" && screen !== "join" && <p className="toast-message" role="status">{error}<button onClick={() => setError("")} aria-label="Dismiss"><X size={14} /></button></p>}
+      <Toast toast={toast} onDismiss={dismissToast} />
     </main>
   );
 }
