@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { HomeScreen } from "./screens/HomeScreen";
 import { JoinScreen } from "./screens/JoinScreen";
 import { SetupScreen } from "./screens/SetupScreen";
@@ -7,12 +7,13 @@ import { BallotReviewScreen } from "./screens/BallotReviewScreen";
 import { WinnerScreen } from "./screens/WinnerScreen";
 import { VoteScreen } from "./screens/VoteScreen";
 import { TieResolutionScreen } from "./screens/TieResolutionScreen";
+import { YourRoomsScreen } from "./screens/YourRoomsScreen";
 import { ConfirmDialog } from "./components/Modal";
 import { ArrowLeft, ArrowRight, Check, CircleHelp, Clapperboard, Copy, Footprints, Plus, Sparkles, Trash2, Utensils, Users, WandSparkles, X } from "lucide-react";
 import { applyRoomAction, canStartVoting, createRoom, resolveCurrentRound, type DecisionCategory, type DecisionRoom, type VoteValue } from "@wafflr/core";
 import { Badge, Butters, Button, Card, EmptyState, SectionHeading, TextField } from "@wafflr/ui";
 
-type Screen = "home" | "join" | "setup" | "room" | "review" | "vote" | "ballot-review" | "tie" | "choose-winner" | "winner";
+type Screen = "home" | "join" | "setup" | "room" | "review" | "vote" | "ballot-review" | "tie" | "choose-winner" | "winner" | "your-rooms";
 type DraftCard = { title: string; category: string; location: string };
 const categories: { id: DecisionCategory; title: string; subtitle: string; icon: typeof Utensils }[] = [
   { id: "eat", title: "What to eat", subtitle: "Restaurants, snacks, the works", icon: Utensils },
@@ -30,6 +31,7 @@ export default function App() {
   const [mode, setMode] = useState<"creator-only" | "guests-contribute">("guests-contribute");
   const [quota, setQuota] = useState<1 | 2 | 3>(2);
   const [room, setRoom] = useState<DecisionRoom | null>(null);
+  const [rooms, setRooms] = useState<DecisionRoom[]>([]);
   const [draft, setDraft] = useState<DraftCard>(blankCard());
   const [editCardId, setEditCardId] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -40,6 +42,11 @@ export default function App() {
   const [removeCardId, setRemoveCardId] = useState<string | null>(null);
 
   const creatorId = "this-device";
+
+  useEffect(() => {
+    if (!room) return;
+    setRooms((current) => [room, ...current.filter((item) => item.id !== room.id)]);
+  }, [room]);
   const activeCards = useMemo(() => {
     if (!room) return [];
     const ids = room.phase === "tie-breaker" && room.tieBreakerCardIds ? room.tieBreakerCardIds : room.cards.map((card) => card.id);
@@ -143,7 +150,9 @@ export default function App() {
         <span className="topbar-tag">Stop waffling. Start living.</span>
       </header>
 
-      {screen === "home" && <HomeScreen onCreate={beginSetup} onJoin={() => { setError(""); setScreen("join"); }} />}
+      {screen === "home" && <HomeScreen onCreate={beginSetup} onJoin={() => { setError(""); setScreen("join"); }} onYourRooms={() => setScreen("your-rooms")} />}
+
+      {screen === "your-rooms" && <YourRoomsScreen rooms={rooms} onBack={() => setScreen("home")} onOpen={(selectedRoom) => { setRoom(selectedRoom); setScreen(selectedRoom.phase === "winner" ? "winner" : selectedRoom.phase === "voting" ? "vote" : selectedRoom.phase === "tie-breaker" ? "tie" : "room"); }} />
 
       {screen === "join" && <JoinScreen code={joinCode} onCodeChange={setJoinCode} error={error} onBack={() => setScreen("home")} onContinue={() => setError("Live room joining needs the shared room service, which is not connected yet.")} />}
 
