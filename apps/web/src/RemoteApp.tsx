@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Copy, Pencil, Plus, RefreshCw, Sparkles, Trash2 } from "lucide-react";
 import { Badge, Butters, Button, Card, SectionHeading, TextField } from "@wafflr/ui";
-import { createBackend, type RoomCategory, type RoomIdentity, type RoomSnapshot } from "./supabase";
+import { createBackend, type RoomCategory, type RoomHistoryEntry, type RoomIdentity, type RoomSnapshot } from "./supabase";
 import { ConfirmDialog } from "./components/Modal";
 import { RemoteSetupWizard } from "./RemoteSetupWizard";
 import { QRScannerScreen, RoomIntroScreen, ShareRoomDialog, TalliesDialog, WaitingScreen } from "./CatalogScreens";
@@ -19,6 +19,8 @@ const categories: { id: RoomCategory; title: string; subtitle: string; emoji: st
   { id: "custom", title: "Custom", subtitle: "Make it your own", emoji: "💡" },
 ];
 const storageKey = "wafflr.room-identity.v1";
+const historyKey = "wafflr.room-history.v1";
+function readRoomHistory(): RoomHistoryEntry[] { try { const value = localStorage.getItem(historyKey); return value ? JSON.parse(value) as RoomHistoryEntry[] : []; } catch { return []; } }
 const backend = createBackend(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
 type Draft = { title: string; category: string; location: string };
 const emptyDraft = (): Draft => ({ title: "", category: "", location: "" });
@@ -33,8 +35,12 @@ export default function RemoteApp() {
   const [ballotReviewOpen, setBallotReviewOpen] = useState(false);
   const [tieIntroOpen, setTieIntroOpen] = useState(false);
   const finishTieIntro = useCallback(() => setTieIntroOpen(false), []);
+  const [roomHistory, setRoomHistory] = useState<RoomHistoryEntry[]>(readRoomHistory);
+  const [roomIcon, setRoomIcon] = useState("🧇");
+  const [clockNow, setClockNow] = useState(Date.now());
   const [identity, setIdentity] = useState<RoomIdentity | null>(() => {
-    try { const saved = sessionStorage.getItem(storageKey); return saved ? JSON.parse(saved) as RoomIdentity : null; } catch { return null; }
+    try { const saved = sessionStorage.getItem(storageKey); if (saved) return JSON.parse(saved) as RoomIdentity; } catch { /* fall back to persistent history */ }
+    return readRoomHistory()[0] ?? null;
   });
   const [snapshot, setSnapshot] = useState<RoomSnapshot | null>(null);
   const [category, setCategory] = useState<RoomCategory>("eat");
@@ -74,6 +80,12 @@ export default function RemoteApp() {
   const saveIdentity = useCallback((next: RoomIdentity) => {
     setIdentity(next);
     try { sessionStorage.setItem(storageKey, JSON.stringify(next)); } catch { /* session storage may be unavailable */ }
+    setRoomHistory(current => {
+      const entry: RoomHistoryEntry = { ...next, last_opened_at: new Date().toISOString() };
+      const updated = [entry, ...current.filter(room => room.room_id !== next.room_id)].slice(0, 50);
+      try { localStorage.setItem(historyKey, JSON.stringify(updated)); } catch { /* local history may be disabled */ }
+      return updated;
+    });
     setSnapshot(null); setResult(null); setResponses({}); setSubmitted(false); setDeadline(null); setError("");
   }, []);
 
@@ -83,6 +95,11 @@ export default function RemoteApp() {
     try {
       const next = await backend.snapshot(identity);
       setSnapshot(next);
+      setRoomHistory(current => {
+        const updated = current.map(room => room.room_id === next.room_id ? { ...room, title: next.title, category: next.category, room_icon: next.room_icon, phase: next.phase, contribution_mode: next.contribution_mode, cards_per_participant: next.cards_per_participant } : room);
+        try { localStorage.setItem(historyKey, JSON.stringify(updated)); } catch { /* local history may be disabled */ }
+        return updated;
+      });
       if (next.active_round_id && (next.phase === "winner" || next.phase === "tie-result" || next.phase === "closed")) {
         try { const r = await backend.roundResults(identity, next.active_round_id); setResult(r); } catch { /* result is not available for an unresolved or empty round */ }
       }
@@ -100,11 +117,27 @@ export default function RemoteApp() {
 
   useEffect(() => {
     if (!identity) return;
+    setRoomHistory(current => {
+      if (current.some(room => room.room_id === identity.room_id)) return current;
+      const updated = [{ ...identity, last_opened_at: new Date().toISOString() }, ...current].slice(0, 50);
+      try { localStorage.setItem(historyKey, JSON.stringify(updated)); } catch { /* local history may be disabled */ }
+      return updated;
+    });
+  }, [identity]);
+
+  useEffect(() => {
+    if (!identity) return;
     void refresh();
     const poll = window.setInterval(() => { void refresh(true); }, 3000);
     const beat = window.setInterval(() => { void backend.heartbeat(identity).catch(() => undefined); }, 60000);
     return () => { window.clearInterval(poll); window.clearInterval(beat); };
   }, [identity, refresh]);
+
+  useEffect(() => {
+    if (!snapshot?.contribution_deadline) return;
+    const timer = window.setInterval(() => setClockNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [snapshot?.contribution_deadline]);
 
   useEffect(() => {
     if (!identity || !snapshot?.active_round_id || snapshot.role !== "host" || !submitted) return;
@@ -136,7 +169,10 @@ export default function RemoteApp() {
     const trimmed = title.trim();
     if (!trimmed) { setError("Give your decision a title first."); return; }
     const created = await perform(() => backend.createRoom({ title: trimmed, category, contributionMode: mode, quota: mode === "guest-quota" ? quota : null }));
-    if (created) { saveIdentity(created); setScreen("home"); }
+    if (created) {
+      try { await backend.setRoomIcon(created, roomIcon); } catch (cause) { setError(cause instanceof Error ? cause.message : "Room created, but the icon could not be saved."); }
+      saveIdentity({ ...created, room_icon: roomIcon }); setScreen("home");
+    }
   }
   async function joinRoom() {
     const joined = await perform(() => backend.joinRoom(joinCode.trim().toUpperCase()));
@@ -162,6 +198,11 @@ export default function RemoteApp() {
   async function removeCard(cardId: string) {
     if (!identity) return;
     await perform(() => backend.removeCard(identity, cardId));
+  }
+  async function startContributionCutoff() {
+    if (!identity) return;
+    const cutoff = await perform(() => backend.beginContributionCutoff(identity));
+    if (cutoff) { setError("Contribution cutoff started. Everyone has one minute to finish."); setClockNow(Date.now()); }
   }
   async function startVoting() {
     if (!identity) return;
@@ -225,6 +266,20 @@ export default function RemoteApp() {
       catch { setError(`Share this room code: ${code}`); }
     }
   }
+  function forgetRoom(room: RoomHistoryEntry) {
+    setRoomHistory(current => {
+      const updated = current.filter(item => item.room_id !== room.room_id);
+      try { localStorage.setItem(historyKey, JSON.stringify(updated)); } catch { /* local history may be disabled */ }
+      return updated;
+    });
+    if (identity?.room_id === room.room_id) {
+      try { sessionStorage.removeItem(storageKey); } catch { /* ignore */ }
+      setIdentity(null); setSnapshot(null); setResult(null);
+    }
+  }
+  function openHistoryRoom(room: RoomHistoryEntry) {
+    saveIdentity(room); setShowYourRooms(false); setShowIntro(false); setScreen("home");
+  }
   function leaveRoom() { setConfirmLeaveOpen(true); }
   function confirmLeaveRoom() {
     try { sessionStorage.removeItem(storageKey); } catch { /* ignore */ }
@@ -233,24 +288,27 @@ export default function RemoteApp() {
   }
 
   if (!identity) return <main className="app-shell">
-    <header className="topbar"><button className="brand" onClick={() => setScreen("home")}><span className="brand-mark">🧇</span><span>wafflr</span></button><span className="topbar-tag">Stop waffling. Start living.</span></header>
+    <header className="topbar"><button className="brand" onClick={() => setScreen("home")}><span className="brand-mark">🧇</span><span>wafflr</span></button><button className="topbar-rooms" onClick={() => setShowYourRooms(true)}>Your Rooms <span>{roomHistory.length}</span></button><span className="topbar-tag">Stop waffling. Start living.</span></header>
     {screen === "home" && <section className="home-layout"><div className="home-copy"><Badge tone="warning"><Sparkles size={13} /> SHARED GROUP DECISIONS</Badge><h1>Less waffling.<br /><span>More living.</span></h1><p className="hero-description">Create a room, share the code, and let everyone vote together. No accounts or names required.</p><div className="home-actions"><Button size="lg" trailingIcon={<ArrowRight size={18} />} onClick={() => { setScreen("setup"); setError(""); }}>Create a room</Button><Button size="lg" variant="secondary" onClick={() => { setScreen("join"); setError(""); }}>Join a room</Button></div><p className="microcopy">🧇 Rooms sync across devices. Participant secrets stay in this browser session.</p></div><div className="hero-art"><Card className="preview-card"><div className="preview-header"><div><span className="eyebrow">ONE ROOM. ONE DECISION.</span><h2>Where should we eat?</h2></div><span className="mini-avatar">👥</span></div><div className="food-art">🍕</div><div className="preview-option"><div><h3>Everyone gets a say</h3><p>One shared deck. A group decision.</p></div><span className="yes-chip">Yup!</span></div></Card><div className="butters-float"><Butters mood="celebrating" size="lg" /><span>Let’s pick!</span></div></div></section>}
-    {screen === "setup" && <RemoteSetupWizard title={title} onTitleChange={setTitle} category={category} onCategoryChange={setCategory} mode={mode} onModeChange={setMode} quota={quota} onQuotaChange={setQuota} error={error} busy={busy} onBack={() => { setError(""); setScreen("home"); }} onCreate={() => void createRoom()} />}
+    {screen === "setup" && <RemoteSetupWizard title={title} onTitleChange={setTitle} category={category} onCategoryChange={setCategory} roomIcon={roomIcon} onRoomIconChange={setRoomIcon} mode={mode} onModeChange={setMode} quota={quota} onQuotaChange={setQuota} error={error} busy={busy} onBack={() => { setError(""); setScreen("home"); }} onCreate={() => void createRoom()} />}
     {screen === "join" && <section className="narrow-screen"><Button variant="quiet" leadingIcon={<ArrowLeft size={17}/>} onClick={() => setScreen("home")}>Back</Button><Card className="form-card"><Butters size="md"/><SectionHeading title="Join the decision" description="Enter the room code shared by your host, or scan its QR code."/><TextField label="Room code" value={joinCode} onChange={event => setJoinCode(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,12))} placeholder="12-character code" autoCapitalize="characters"/>{error && <p className="inline-error" role="alert">{error}</p>}<Button fullWidth disabled={busy || joinCode.trim().length < 4} onClick={() => void joinRoom()}>Join room</Button><Button fullWidth variant="secondary" onClick={() => setScreen("scanner")}>Scan QR code</Button></Card></section>}
     {screen === "scanner" && <QRScannerScreen onCode={code => { setJoinCode(code); setScreen("join"); }} onBack={() => setScreen("join")} />}
-    {error && <p className="toast-message" role="status">{error}<button onClick={() => setError("")}>×</button></p>}<footer className="site-footer"><span>🧇 Wafflr</span><span>Shared rooms · No accounts</span><span/></footer>
+    {error && <p className="toast-message" role="status">{error}<button onClick={() => setError("")}>×</button></p>}<YourRoomsDialog open={showYourRooms} onClose={() => setShowYourRooms(false)} rooms={roomHistory} onOpen={openHistoryRoom} onForget={forgetRoom} />
+    <footer className="site-footer"><span>🧇 Wafflr</span><span>Shared rooms · No accounts</span><span/></footer>
   </main>;
 
   const phase = snapshot?.phase ?? identity.phase;
+  const cutoffRemaining = snapshot?.contribution_deadline ? Math.max(0, Math.ceil((Date.parse(snapshot.contribution_deadline) - clockNow) / 1000)) : null;
   const isVoting = phase === "voting" || phase === "tie-breaker";
   const winnerId = result?.winner_card_id ?? null;
   const currentVoteCard = activeCards[Math.min(voteIndex, Math.max(0, activeCards.length - 1))];
   const eligibleTieCards = result?.tally?.filter(item => item.yep_count === Math.max(...(result?.tally ?? []).map(x => x.yep_count))).map(item => cardById.get(item.card_id)).filter((card): card is NonNullable<typeof card> => Boolean(card)) ?? [];
 
   return <main className="app-shell">
-    <header className="topbar"><button className="brand" onClick={() => { setError(""); void refresh(); }}><span className="brand-mark">🧇</span><span>wafflr</span></button><button className="topbar-rooms" onClick={() => setShowYourRooms(true)}>Your Rooms <span>1</span></button><span className="topbar-tag">Stop waffling. Start living.</span></header>
+    <header className="topbar"><button className="brand" onClick={() => { setError(""); void refresh(); }}><span className="brand-mark">{snapshot?.room_icon ?? identity.room_icon ?? "🧇"}</span><span>wafflr</span></button><button className="topbar-rooms" onClick={() => setShowYourRooms(true)}>Your Rooms <span>{roomHistory.length}</span></button><span className="topbar-tag">Stop waffling. Start living.</span></header>
     <section className={`workflow-screen ${showIntro ? "intro-active" : ""}`}>
       {showIntro && snapshot && <RoomIntroScreen title={snapshot.title} category={currentCategory.title} onContinue={() => setShowIntro(false)} />}
+      {snapshot && isHost && snapshot.contribution_mode === "guest-quota" && ["setup", "collecting", "reviewing"].includes(phase) && <div className="contribution-cutoff-panel"><div><strong>{cutoffRemaining === null ? "Ready to close contributions?" : cutoffRemaining > 0 ? "Contribution cutoff is running" : "Contribution window ended"}</strong><p>{cutoffRemaining === null ? "Give everyone one final minute to finish their options. New cards and edits stop when the timer ends." : cutoffRemaining > 0 ? "The deck stays editable during this grace period." : "New submissions and edits are now blocked by the room service."}</p></div>{cutoffRemaining === null ? <Button variant="secondary" disabled={busy} onClick={() => void startContributionCutoff()}>Start 1-minute cutoff</Button> : <span className="cutoff-countdown" role="timer">{Math.floor(cutoffRemaining/60)}:{String(cutoffRemaining%60).padStart(2,"0")}</span>}</div>}
       <div className="room-topline"><Button variant="quiet" leadingIcon={<ArrowLeft size={17}/>} onClick={leaveRoom}>Leave room</Button><Badge tone={phase === "winner" ? "success" : "warning"}>{phase.replaceAll("-", " ")}</Badge></div>
       <div className="room-code-card"><div><span className="eyebrow">ROOM CODE · SHARE WITH YOUR CREW</span><strong>{snapshot?.room_code ?? identity.room_code}</strong><p>{snapshot?.title ?? identity.title} · {currentCategory.title}</p></div><div className="room-code-actions"><Button variant="secondary" size="sm" leadingIcon={<Copy size={15}/>} onClick={() => void copyCode()}>Copy code</Button><Button size="sm" leadingIcon={<ArrowRight size={15}/>} onClick={() => setShareOpen(true)}>Share room</Button></div></div>
       {!snapshot && error ? <ErrorRecoveryScreen message={error} onRetry={() => void refresh()} onBack={() => setError("")} /> : !snapshot && <Card className="form-card"><RefreshCw size={24}/><SectionHeading title="Connecting to your room…" description="Loading the latest room state."/><Button variant="secondary" onClick={() => void refresh()}>Retry connection</Button></Card>}
@@ -268,7 +326,7 @@ export default function RemoteApp() {
     </section>
     <ShareRoomDialog open={shareOpen} code={snapshot?.room_code ?? identity.room_code} onClose={() => setShareOpen(false)} onCopy={() => void copyCode()} onShare={() => void shareInvite()} />
     <TalliesDialog open={showTallies} onClose={() => setShowTallies(false)} tally={result?.tally ?? []} cards={cards.map(card => ({ id: card.id, title: card.category_data.title ?? "Untitled option" }))} />
-    <YourRoomsDialog open={showYourRooms} onClose={() => setShowYourRooms(false)} title={snapshot?.title ?? identity.title} code={snapshot?.room_code ?? identity.room_code} phase={snapshot?.phase ?? identity.phase} onOpen={() => { setShowYourRooms(false); setShowIntro(false); void refresh(); }} />
+    <YourRoomsDialog open={showYourRooms} onClose={() => setShowYourRooms(false)} rooms={roomHistory} onOpen={openHistoryRoom} onForget={forgetRoom} />
     <BallotReviewDialog open={ballotReviewOpen} onClose={() => setBallotReviewOpen(false)} cards={activeCards.map(card => ({id:card.id,title:card.category_data.title ?? "Untitled option"}))} responses={responses} onChange={index => { setVoteIndex(index); setBallotReviewOpen(false); }} onConfirm={() => { setBallotReviewOpen(false); void submitBallot(); }} busy={busy} />
     <ConfirmDialog open={confirmStartOpen} title="Lock the deck and start voting?" description="Everyone will vote on this exact set of options. You won’t be able to add, edit, or remove cards once voting begins." confirmLabel="Lock deck & start" onCancel={() => setConfirmStartOpen(false)} onConfirm={() => { setConfirmStartOpen(false); void startVoting(); }} />
     <ConfirmDialog open={Boolean(removeCardId)} title="Remove this option?" description="This option will disappear from the shared deck for everyone. This can’t be undone." confirmLabel="Remove option" destructive onCancel={() => setRemoveCardId(null)} onConfirm={() => { if (removeCardId) void removeCard(removeCardId); setRemoveCardId(null); }} />

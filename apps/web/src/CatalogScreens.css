@@ -1,18 +1,27 @@
-.intro-active > :not(.room-intro-screen) { display:none !important; }
-.room-intro-screen { max-width:32rem; margin:3rem auto; }
-.room-intro-screen .form-card { align-items:center; text-align:center; }
-.waiting-screen { align-items:center; text-align:center; margin:1.5rem 0; }
-.share-qr-wrap { display:flex; flex-direction:column; align-items:center; gap:.5rem; margin:.25rem 0 1.25rem; }
-.share-qr { width:12rem; height:12rem; object-fit:contain; border:1px solid var(--wafflr-color-line); border-radius:1rem; background:white; padding:.4rem; }
-.qr-camera-preview { display:block; width:100%; max-height:24rem; min-height:12rem; object-fit:cover; background:#1e1a17; border-radius:1rem; }
-.all-tallies-list { max-height:min(55vh,30rem); overflow:auto; }
-.all-tallies-list .results-tally-row { display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:.9rem .25rem; border-bottom:1px solid var(--wafflr-color-line); }
-.all-tallies-list small { color:var(--wafflr-color-ink-muted); font-weight:800; margin-right:.45rem; }
-.ballot-review-list { max-height:min(55vh,32rem); overflow:auto; }
-.ballot-review-row { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.85rem .2rem; border-bottom:1px solid var(--wafflr-color-line); }
-.ballot-review-row > div { display:flex; flex-direction:column; gap:.3rem; min-width:0; }
-.ballot-review-row strong { overflow-wrap:anywhere; }
-.ballot-yep,.ballot-nah { font-size:.8rem; font-weight:900; }
-.ballot-yep { color:#3f8056; }
-.ballot-nah { color:var(--wafflr-color-danger); }
-@media (prefers-reduced-motion: reduce) { .confetti { animation:none; } }
+.room-icon-picker { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:.55rem; margin-top:.8rem; }
+.room-icon-picker button { display:grid; place-items:center; aspect-ratio:1; border:1px solid var(--wafflr-color-line); border-radius:1rem; background:white; font-size:1.65rem; cursor:pointer; transition:transform .15s ease,border-color .15s ease,background .15s ease; }
+.room-icon-picker button:hover { transform:translateY(-2px); }
+.room-icon-picker button.is-selected { border:2px solid var(--wafflr-color-ink); background:var(--wafflr-color-butter-soft); box-shadow:0 0 0 3px rgba(245,190,54,.2); }
+.contribution-cutoff-panel { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin:0 0 1rem; padding:1rem 1.1rem; border:1px solid var(--wafflr-color-line); border-radius:1.15rem; background:var(--wafflr-color-butter-soft); }
+.contribution-cutoff-panel > div { min-width:0; }
+.contribution-cutoff-panel strong { display:block; font-weight:900; }
+.contribution-cutoff-panel p { margin:.25rem 0 0; color:var(--wafflr-color-ink-soft); font-size:.88rem; line-height:1.45; }
+.cutoff-countdown { font-variant-numeric:tabular-nums; font-size:1.55rem; font-weight:950; white-space:nowrap; }
+.your-rooms-list { display:grid; gap:.75rem; max-height:min(58vh,38rem); overflow:auto; }
+.your-room-card { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1rem; }
+.your-room-main { display:flex; align-items:center; gap:.85rem; min-width:0; }
+.your-room-main > div { min-width:0; }
+.your-room-emoji { display:grid; place-items:center; flex:0 0 3rem; width:3rem; height:3rem; border-radius:1rem; background:var(--wafflr-color-butter-soft); font-size:1.55rem; }
+.your-room-card h3 { margin:.15rem 0; overflow-wrap:anywhere; }
+.your-room-card p { display:flex; align-items:center; gap:.3rem; margin:.25rem 0; color:var(--wafflr-color-ink-soft); font-size:.8rem; }
+.room-history-status { display:inline-flex; margin-top:.3rem; padding:.2rem .5rem; border-radius:999px; background:#e5f4e8; color:#2c7042; font-size:.68rem; font-weight:900; text-transform:uppercase; letter-spacing:.04em; }
+.room-history-status.is-complete { background:#eeeaf7; color:#63518c; }
+.your-room-actions { display:flex; flex-direction:column; align-items:flex-end; gap:.4rem; flex-shrink:0; }
+.your-room-actions .text-action { display:inline-flex; align-items:center; gap:.3rem; font-size:.75rem; }
+@media (max-width:600px) {
+ .room-icon-picker { grid-template-columns:repeat(4,minmax(0,1fr)); }
+ .contribution-cutoff-panel { align-items:flex-start; flex-direction:column; }
+ .your-room-card { align-items:stretch; flex-direction:column; }
+ .your-room-actions { align-items:stretch; }
+}
+@media (prefers-reduced-motion:reduce) { .room-icon-picker button { transition:none; } .room-icon-picker button:hover { transform:none; } }

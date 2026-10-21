@@ -31,6 +31,10 @@ Web dev server: `http://localhost:5173`. The mobile app is a placeholder, not a 
 
 No root test command is currently defined. Use existing package-specific tests if present; add tests with new domain behavior.
 
+## Shared-room configuration
+
+The local prototype runs without credentials. Cross-device shared rooms require a Supabase project with the migrations in `supabase/migrations` applied. Copy `apps/web/.env.example` to `apps/web/.env.local`, then set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` from that project. Restart `pnpm dev` after changing environment variables. The publishable/anon key is designed for browser use; never use a service-role key in the web app. Without a configured project, the app intentionally opens the local prototype instead of pretending shared rooms are synchronized.
+
 ## Environment safety
 
 - The current prototype does not require Supabase credentials.
