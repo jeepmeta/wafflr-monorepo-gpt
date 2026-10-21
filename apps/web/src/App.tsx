@@ -8,6 +8,7 @@ import { WinnerScreen } from "./screens/WinnerScreen";
 import { VoteScreen } from "./screens/VoteScreen";
 import { TieResolutionScreen } from "./screens/TieResolutionScreen";
 import { YourRoomsScreen } from "./screens/YourRoomsScreen";
+import { RoomBuilderScreen } from "./screens/RoomBuilderScreen";
 import { ConfirmDialog, Modal } from "./components/Modal";
 import { Toast } from "./components/Toast";
 import { useToast } from "./hooks/useToast";
@@ -78,7 +79,7 @@ export default function App() {
     if (editCardId) {
       const result = applyRoomAction(room, { type: "update-own-card", cardId: editCardId, participantId: creatorId, patch: { title, category: draft.category.trim() || undefined, location: draft.location.trim() || undefined } });
       if (!result.ok) { setError("Couldn’t update that option. Try again."); return; }
-      setRoom(result.room); setDraft(blankCard()); setEditCardId(null); setError(""); return;
+      setRoom(result.room); setDraft(blankCard()); setEditCardId(null); setError(""); showToast("Option updated.", "success"); return;
     }
     if (contributionFull) { setError("You’ve added all your cards for this room."); return; }
     if (room.cards.length >= 100) { setError("Room full — 100/100 cards."); return; }
@@ -171,7 +172,7 @@ export default function App() {
 
       {screen === "home" && <HomeScreen onCreate={beginSetup} onJoin={() => { setError(""); setScreen("join"); }} onYourRooms={() => setScreen("your-rooms")} />}
 
-      {screen === "your-rooms" && <YourRoomsScreen rooms={rooms} onBack={() => setScreen("home")} onOpen={(selectedRoom) => { setRoom(selectedRoom); setScreen(selectedRoom.phase === "winner" ? "winner" : selectedRoom.phase === "voting" ? "vote" : selectedRoom.phase === "tie-breaker" ? "tie" : "room"); }} />}
+      {screen === "your-rooms" && <YourRoomsScreen rooms={rooms} onBack={() => setScreen("home")} onOpen={(selectedRoom) => { setRoom(selectedRoom); setScreen(selectedRoom.phase === "winner" ? "winner" : selectedRoom.phase === "voting" ? "vote" : selectedRoom.phase === "tie-breaker" ? "tie" : selectedRoom.phase === "reviewing" ? "review" : "room"); }} />}
 
       {screen === "join" && <JoinScreen code={joinCode} onCodeChange={setJoinCode} error={error} onBack={() => setScreen("home")} onContinue={() => setError("Live room joining needs the shared room service, which is not connected yet.")} />}
 
@@ -179,18 +180,7 @@ export default function App() {
 
       {screen === "review" && room && <ReviewScreen room={room} category={category} error={error} onBack={() => setScreen("room")} onAddMore={() => setScreen("room")} onEditCard={editCard} onRequestRemove={(id) => setRemoveCardId(id)} onRequestStart={() => setConfirmStartOpen(true)} />}
 
-      {screen === "room" && room && <section className="workflow-screen">
-        <div className="room-topline"><Button variant="quiet" leadingIcon={<ArrowLeft size={17} />} onClick={() => setScreen("home")}>Home</Button><Badge tone="success">Room created</Badge></div>
-        <div className="room-code-card"><div><span className="eyebrow">YOUR ROOM CODE</span><strong>{room.code}</strong><p>Share this code with your crew. QR sharing arrives with room sync.</p></div><div className="room-code-actions"><Button variant="secondary" size="sm" leadingIcon={<Copy size={15} />} onClick={copyCode}>Copy code</Button><Button size="sm" onClick={() => setShareOpen(true)}>Share room</Button></div></div>
-        <SectionHeading eyebrow="BUILD THE DECK" title={room.title} description="Add the choices your group could be happy with. You can edit or remove options before voting starts." action={<Badge>{room.cards.length}/100 cards</Badge>} />
-        <div className="add-card-panel">
-          <div className="add-card-fields"><TextField label={category === "eat" ? "Restaurant or option name" : "Option name"} value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} placeholder={category === "eat" ? "e.g. Noodle House" : "e.g. Movie night"} onKeyDown={(event) => { if (event.key === "Enter") addCard(); }} /><div className="optional-fields">{category === "eat" && <TextField label="Cuisine / category" value={draft.category} onChange={(event) => setDraft({ ...draft, category: event.target.value })} placeholder="e.g. Thai" /> }<TextField label={category === "eat" ? "Location (optional)" : "Extra detail (optional)"} value={draft.location} onChange={(event) => setDraft({ ...draft, location: event.target.value })} placeholder={category === "eat" ? "Neighborhood or address" : "A little context"} /></div></div>
-          <div className="add-card-actions"><Button leadingIcon={<Plus size={17} />} onClick={addCard} disabled={!editCardId && (room.cards.length >= 100 || contributionFull)}>{editCardId ? "Save changes" : "Add option"}</Button>{editCardId && <Button variant="quiet" onClick={cancelCardEdit}>Cancel</Button>}</div>
-          {error && <p className="inline-error" role="alert">{error}</p>}
-        </div>
-        {room.cards.length === 0 ? <EmptyState title="Your deck starts here" description="Add at least two options to unlock voting. No need to make this complicated." /> : <div className="option-grid">{room.cards.map((card, index) => <Card className="option-card" key={card.id}><div className="option-card-top"><span className="option-number">{String(index + 1).padStart(2, "0")}</span><div className="option-card-controls"><button className="remove-option" onClick={() => editCard(card.id)} aria-label={`Edit ${card.title}`} title="Edit this card"><span aria-hidden="true">✎</span></button><button className="remove-option" onClick={() => removeCard(card.id)} aria-label={`Remove ${card.title}`} title="Remove this card"><X size={16} /></button></div></div><div className="option-emoji">{category === "eat" ? ["🍕","🍜","🌮","🍔","🥗"][index % 5] : category === "watch" ? "🎬" : category === "do" ? "🎯" : "💡"}</div><h3>{card.title}</h3>{card.category && <span className="option-meta">{card.category}</span>}{card.location && <p className="option-location">{card.location}</p>}</Card>)}</div>}
-        <div className="workflow-footer sticky-footer"><span>{room.contributionMode === "guests-contribute" ? `Your cards: ${myCardCount}/${room.cardLimitPerGuest} · ` : ""}{room.cards.length < 2 ? `Add ${2 - room.cards.length} more option${2 - room.cards.length === 1 ? "" : "s"} to start` : "Deck ready when you are"}</span><Button size="lg" trailingIcon={<ArrowRight size={18} />} disabled={!canStartVoting(room)} onClick={startVoting}>Review deck & vote</Button></div>
-      </section>}
+      {screen === "room" && room && <RoomBuilderScreen room={room} category={category} draft={draft} editCardId={editCardId} error={error} myCardCount={myCardCount} contributionFull={contributionFull} onBack={() => setScreen("home")} onDraftChange={(field, value) => setDraft((current) => ({ ...current, [field]: value }))} onAddCard={addCard} onEditCard={editCard} onRequestRemove={setRemoveCardId} onCancelEdit={cancelCardEdit} onCopyCode={copyCode} onShare={() => setShareOpen(true)} onStartVoting={startVoting} />}
 
       {screen === "ballot-review" && room && <BallotReviewScreen room={room} category={category} cards={activeCards} responses={responses} error={error} onBack={() => setScreen(room.phase === "tie-breaker" ? "tie" : "vote")} onChangeVote={(index) => { setVoteIndex(index); setScreen(room.phase === "tie-breaker" ? "tie" : "vote"); }} onSubmit={submitVotes} />}
 
