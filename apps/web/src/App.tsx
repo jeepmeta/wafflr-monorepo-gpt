@@ -167,6 +167,7 @@ export default function App() {
     <main className="app-shell">
       <header className="topbar">
         <button className="brand" onClick={() => setScreen("home")} aria-label="Wafflr home"><span className="brand-mark">🧇</span><span>wafflr</span></button>
+        <button className="topbar-rooms" onClick={() => setScreen("your-rooms")}>Your Rooms <span>{rooms.length}</span></button>
         <span className="topbar-tag">Stop waffling. Start living.</span>
       </header>
 
