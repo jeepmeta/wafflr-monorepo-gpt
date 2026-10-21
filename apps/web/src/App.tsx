@@ -34,7 +34,9 @@ export default function App() {
   const [mode, setMode] = useState<"creator-only" | "guests-contribute">("guests-contribute");
   const [quota, setQuota] = useState<1 | 2 | 3>(2);
   const [room, setRoom] = useState<DecisionRoom | null>(null);
-  const [rooms, setRooms] = useState<DecisionRoom[]>([]);
+  const [rooms, setRooms] = useState<DecisionRoom[]>(() => { try { const saved = localStorage.getItem("wafflr.local-rooms.v1"); return saved ? JSON.parse(saved) as DecisionRoom[] : []; } catch { return []; } });
+  const [roomIcon, setRoomIcon] = useState("🧇");
+  const [roomIcons, setRoomIcons] = useState<Record<string, string>>(() => { try { const saved = localStorage.getItem("wafflr.local-room-icons.v1"); return saved ? JSON.parse(saved) as Record<string, string> : {}; } catch { return {}; } });
   const [draft, setDraft] = useState<DraftCard>(blankCard());
   const [editCardId, setEditCardId] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -52,6 +54,8 @@ export default function App() {
     if (!room) return;
     setRooms((current) => [room, ...current.filter((item) => item.id !== room.id)]);
   }, [room]);
+  useEffect(() => { try { localStorage.setItem("wafflr.local-rooms.v1", JSON.stringify(rooms)); } catch { /* local history may be disabled */ } }, [rooms]);
+  useEffect(() => { try { localStorage.setItem("wafflr.local-room-icons.v1", JSON.stringify(roomIcons)); } catch { /* local history may be disabled */ } }, [roomIcons]);
   const activeCards = useMemo(() => {
     if (!room) return [];
     const ids = room.phase === "tie-breaker" && room.tieBreakerCardIds ? room.tieBreakerCardIds : room.cards.map((card) => card.id);
@@ -59,13 +63,14 @@ export default function App() {
   }, [room]);
 
   function beginSetup() {
-    setRoom(null); setDraft(blankCard()); setError(""); setCategory("eat"); setRoomTitle(""); setMode("guests-contribute"); setQuota(2); setScreen("setup");
+    setRoom(null); setDraft(blankCard()); setError(""); setCategory("eat"); setRoomTitle(""); setRoomIcon("🧇"); setMode("guests-contribute"); setQuota(2); setScreen("setup");
   }
 
   function createNewRoom() {
     const title = roomTitle.trim();
     if (!title) { setError("Give your decision a title first."); return; }
     const next = createRoom({ id: newId(), code: Math.random().toString(36).slice(2, 8).toUpperCase(), title, creatorId, category, contributionMode: mode, cardLimitPerGuest: quota, now: Date.now() });
+    setRoomIcons(current => ({ ...current, [next.id]: roomIcon }));
     setRoom(next); setError(""); setScreen("room");
   }
 
@@ -173,11 +178,11 @@ export default function App() {
 
       {screen === "home" && <HomeScreen onCreate={beginSetup} onJoin={() => { setError(""); setScreen("join"); }} onYourRooms={() => setScreen("your-rooms")} />}
 
-      {screen === "your-rooms" && <YourRoomsScreen rooms={rooms} onBack={() => setScreen("home")} onOpen={(selectedRoom) => { setRoom(selectedRoom); setScreen(selectedRoom.phase === "winner" ? "winner" : selectedRoom.phase === "voting" ? "vote" : selectedRoom.phase === "tie-breaker" ? "tie" : selectedRoom.phase === "reviewing" ? "review" : "room"); }} />}
+      {screen === "your-rooms" && <YourRoomsScreen rooms={rooms} icons={roomIcons} onBack={() => setScreen("home")} onOpen={(selectedRoom) => { setRoom(selectedRoom); setScreen(selectedRoom.phase === "winner" ? "winner" : selectedRoom.phase === "voting" ? "vote" : selectedRoom.phase === "tie-breaker" ? "tie" : selectedRoom.phase === "reviewing" ? "review" : "room"); }} />}
 
       {screen === "join" && <JoinScreen code={joinCode} onCodeChange={setJoinCode} error={error} onBack={() => setScreen("home")} onContinue={() => setError("Live room joining needs the shared room service, which is not connected yet.")} />}
 
-      {screen === "setup" && <SetupScreen title={roomTitle} onTitleChange={setRoomTitle} category={category} onCategoryChange={setCategory} mode={mode} onModeChange={setMode} quota={quota} onQuotaChange={setQuota} error={error} onBack={() => setScreen("home")} onCreate={createNewRoom} />}
+      {screen === "setup" && <SetupScreen title={roomTitle} onTitleChange={setRoomTitle} category={category} onCategoryChange={setCategory} roomIcon={roomIcon} onRoomIconChange={setRoomIcon} mode={mode} onModeChange={setMode} quota={quota} onQuotaChange={setQuota} error={error} onBack={() => setScreen("home")} onCreate={createNewRoom} />}
 
       {screen === "review" && room && <ReviewScreen room={room} category={category} error={error} onBack={() => setScreen("room")} onAddMore={() => setScreen("room")} onEditCard={editCard} onRequestRemove={(id) => setRemoveCardId(id)} onRequestStart={() => setConfirmStartOpen(true)} />}
 
