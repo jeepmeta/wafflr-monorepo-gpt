@@ -135,7 +135,12 @@ export default function RemoteApp() {
 
   useEffect(() => {
     if (!snapshot?.contribution_deadline) return;
-    const timer = window.setInterval(() => setClockNow(Date.now()), 1000);
+    const deadlineAt = Date.parse(snapshot.contribution_deadline);
+    if (deadlineAt <= Date.now()) return;
+    const timer = window.setInterval(() => {
+      const now = Date.now(); setClockNow(now);
+      if (now >= deadlineAt) window.clearInterval(timer);
+    }, 1000);
     return () => window.clearInterval(timer);
   }, [snapshot?.contribution_deadline]);
 
@@ -308,7 +313,7 @@ export default function RemoteApp() {
     <header className="topbar"><button className="brand" onClick={() => { setError(""); void refresh(); }}><span className="brand-mark">{snapshot?.room_icon ?? identity.room_icon ?? "🧇"}</span><span>wafflr</span></button><button className="topbar-rooms" onClick={() => setShowYourRooms(true)}>Your Rooms <span>{roomHistory.length}</span></button><span className="topbar-tag">Stop waffling. Start living.</span></header>
     <section className={`workflow-screen ${showIntro ? "intro-active" : ""}`}>
       {showIntro && snapshot && <RoomIntroScreen title={snapshot.title} category={currentCategory.title} onContinue={() => setShowIntro(false)} />}
-      {snapshot && isHost && snapshot.contribution_mode === "guest-quota" && ["setup", "collecting", "reviewing"].includes(phase) && <div className="contribution-cutoff-panel"><div><strong>{cutoffRemaining === null ? "Ready to close contributions?" : cutoffRemaining > 0 ? "Contribution cutoff is running" : "Contribution window ended"}</strong><p>{cutoffRemaining === null ? "Give everyone one final minute to finish their options. New cards and edits stop when the timer ends." : cutoffRemaining > 0 ? "The deck stays editable during this grace period." : "New submissions and edits are now blocked by the room service."}</p></div>{cutoffRemaining === null ? <Button variant="secondary" disabled={busy} onClick={() => void startContributionCutoff()}>Start 1-minute cutoff</Button> : <span className="cutoff-countdown" role="timer">{Math.floor(cutoffRemaining/60)}:{String(cutoffRemaining%60).padStart(2,"0")}</span>}</div>}
+      {snapshot && snapshot.contribution_mode === "guest-quota" && ["setup", "collecting", "reviewing"].includes(phase) && (isHost || snapshot.contribution_deadline !== null) && <div className="contribution-cutoff-panel"><div><strong>{cutoffRemaining === null ? "Ready to close contributions?" : cutoffRemaining > 0 ? "Contribution cutoff is running" : "Contribution window ended"}</strong><p>{cutoffRemaining === null ? "Give everyone one final minute to finish their options. New cards and edits stop when the timer ends." : cutoffRemaining > 0 ? "The deck stays editable during this grace period." : "New submissions and edits are now blocked by the room service."}</p></div>{isHost && cutoffRemaining === null ? <Button variant="secondary" disabled={busy} onClick={() => void startContributionCutoff()}>Start 1-minute cutoff</Button> : cutoffRemaining !== null ? <span className="cutoff-countdown" role="timer">{Math.floor(cutoffRemaining/60)}:{String(cutoffRemaining%60).padStart(2,"0")}</span> : null}</div>}
       <div className="room-topline"><Button variant="quiet" leadingIcon={<ArrowLeft size={17}/>} onClick={leaveRoom}>Leave room</Button><Badge tone={phase === "winner" ? "success" : "warning"}>{phase.replaceAll("-", " ")}</Badge></div>
       <div className="room-code-card"><div><span className="eyebrow">ROOM CODE · SHARE WITH YOUR CREW</span><strong>{snapshot?.room_code ?? identity.room_code}</strong><p>{snapshot?.title ?? identity.title} · {currentCategory.title}</p></div><div className="room-code-actions"><Button variant="secondary" size="sm" leadingIcon={<Copy size={15}/>} onClick={() => void copyCode()}>Copy code</Button><Button size="sm" leadingIcon={<ArrowRight size={15}/>} onClick={() => setShareOpen(true)}>Share room</Button></div></div>
       {!snapshot && error ? <ErrorRecoveryScreen message={error} onRetry={() => void refresh()} onBack={() => setError("")} /> : !snapshot && <Card className="form-card"><RefreshCw size={24}/><SectionHeading title="Connecting to your room…" description="Loading the latest room state."/><Button variant="secondary" onClick={() => void refresh()}>Retry connection</Button></Card>}
