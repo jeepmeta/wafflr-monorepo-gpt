@@ -12,6 +12,9 @@ export class BackendError extends Error {
 export function createBackend(url: string = "", publishableKey: string = "", fetcher: typeof fetch = fetch) {
   const base = url.replace(/\/+$/, "");
   async function rpc<T>(name: string, args: Record<string, unknown> = {}): Promise<T> {
+    if (!base || !publishableKey) {
+      throw new BackendError("Shared rooms are not configured yet. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in apps/web/.env.local, then restart the dev server.");
+    }
     let response: Response;
     try {
       response = await fetcher(`${base}/rest/v1/rpc/${name}`, {
