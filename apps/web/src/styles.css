@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "@wafflr/ui/styles.css";
-@import "./responsive.css";\n@import "./components/Modal.css";
+@import "./responsive.css";
+@import "./components/Modal.css";
 
 :root { font-family:var(--wafflr-font-body); font-synthesis:none; text-rendering:optimizeLegibility; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
 html { min-width:320px; background:var(--wafflr-color-paper); }
