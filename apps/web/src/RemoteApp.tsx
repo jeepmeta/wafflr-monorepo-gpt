@@ -10,7 +10,7 @@ import { YourRoomsDialog } from "./YourRoomsDialog";
 import { BallotReviewDialog } from "./BallotReviewDialog";
 import { TieBreakIntroScreen } from "./screens/results/TieBreakIntroScreen";
 import { ErrorRecoveryScreen } from "./screens/room/CatalogScreens";
-import "./CatalogScreens.css";
+import "./screens/room/CatalogScreens.css";
 
 const categories: { id: RoomCategory; title: string; subtitle: string; emoji: string }[] = [
   { id: "eat", title: "Where to eat", subtitle: "Restaurants, snacks, the works", emoji: "🍕" },
