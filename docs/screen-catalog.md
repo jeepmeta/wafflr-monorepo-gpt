@@ -3,7 +3,7 @@
 Screen names are product surfaces, not prescribed route paths. All screens are specifications; check code/tests before claiming implementation.
 
 | ID | Screen/surface | Responsibility and key controls | Important states |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | S01 | Home | Brand, Create Room, Join Room, Your Rooms entry | First use, loading, create/join error |
 | S02 | Category picker | Where to Eat, What to Watch, What to Do, Custom | Selected category |
 | S03 | Room title/icon | Title input; preset icon or Custom icon picker | Validation, save/cancel |

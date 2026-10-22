@@ -15,7 +15,7 @@ This document defines the creator and guest journeys by naming the Screen Catalo
 ## Creator journey
 
 | Step | Screen(s) | Creator action and expected outcome |
-|---|---|---|
+| --- | --- | --- |
 | 1. Start | **S01 Home** | Choose Create Room. If returning to an existing room, use **S20 Your Rooms** to reopen an active or completed room instead. |
 | 2. Choose decision | **S02 Category picker** | Select Where to Eat, What to Watch, What to Do, or Custom. |
 | 3. Name the room | **S03 Room title/icon** | Set the room title and review the preset icon; for Custom, choose a title and icon. Validation errors stay on this screen and preserve entered values. |
@@ -35,7 +35,7 @@ This document defines the creator and guest journeys by naming the Screen Catalo
 ## Guest journey
 
 | Step | Screen(s) | Guest action and expected outcome |
-|---|---|---|
+| --- | --- | --- |
 | 1. Start | **S01 Home** | Choose Join Room. A guest returning to a room may use **S20 Your Rooms** to reopen it if the room is still available. |
 | 2. Join by code | **S21 Join Room** | Enter the room code and submit. Show validation, loading, expired-room, and retry states without losing the entered code. |
 | 3. Join by QR (conditional) | **S23 QR scanner** → **S21 Join Room** | Grant camera permission and scan a room QR code. On success, fill the join field and continue joining; on denied permission or scan failure, offer manual code entry in Join Room. |
@@ -53,7 +53,7 @@ This document defines the creator and guest journeys by naming the Screen Catalo
 ## Cross-journey lifecycle and recovery
 
 | Situation | Screen(s) | Required behavior |
-|---|---|---|
+| --- | --- | --- |
 | Creator returns to an existing room | **S20 Your Rooms** → phase-appropriate screen | Show one recency-sorted list of created/joined rooms with active/completed styling. Restore the authoritative phase and safe participant progress; do not create a duplicate room or ballot. |
 | Guest arrives after voting starts | **S07 Room intro** → **S08 Guest waiting** or **S14 Vote progress** | Do not add the late joiner to the active round's eligible voters. Explain that they must wait for the next round or results. |
 | Room updates while host reviews | **S10 Host final review**; **S08 Guest waiting** | Apply new submissions and edits live until voting starts. The host's grid reflects the same shared deck. |
@@ -77,7 +77,7 @@ Phase names are domain concepts, not a one-to-one list of screens. Use the scree
 Every Screen Catalog entry is named in the journeys above.
 
 | Catalog ID | Screen name | Journey coverage |
-|---|---|---|
+| --- | --- | --- |
 | S01 | Home | Creator 1; Guest 1 |
 | S02 | Category picker | Creator 2 |
 | S03 | Room title/icon | Creator 3 |
