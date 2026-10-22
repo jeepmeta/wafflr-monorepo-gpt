@@ -1,6 +1,6 @@
 import { ArrowRight, Pencil, Trash2 } from "lucide-react";
 import { Badge, Button, Card, SectionHeading } from "@wafflr/ui";
-import type { RoomCard, RoomCategory } from "./supabase";
+import type { RoomCard, RoomCategory } from "../../supabase";
 
 export function HostFinalReview({ title, category, cards, busy, onEdit, onRemove, onBack, onStart }: { title: string; category: RoomCategory; cards: RoomCard[]; busy: boolean; onEdit: (id: string) => void; onRemove: (id: string) => void; onBack: () => void; onStart: () => void }) {
  const emoji = category === "eat" ? ["🍕","🍜","🌮","🍔","🥗"] : category === "watch" ? ["🎬","🍿"] : category === "do" ? ["🎯","🧭"] : ["💡","✨"];

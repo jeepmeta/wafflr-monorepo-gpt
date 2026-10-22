@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Utensils, Clapperboard, Footprints, WandSparkles } from "lucide-react";
 import { Button, SectionHeading, TextField } from "@wafflr/ui";
-import type { RoomCategory } from "./supabase";
+import type { RoomCategory } from "../../supabase";
 const categories:{id:RoomCategory;title:string;subtitle:string;emoji:string;icon:typeof Utensils}[]=[
 {id:"eat",title:"Where to Eat",subtitle:"Restaurants, snacks, the works",emoji:"🍕",icon:Utensils},{id:"watch",title:"What to Watch",subtitle:"Movies, shows, videos",emoji:"🎬",icon:Clapperboard},{id:"do",title:"What to Do",subtitle:"Plans, outings, activities",emoji:"🎯",icon:Footprints},{id:"custom",title:"Custom",subtitle:"Make the decision your own",emoji:"✨",icon:WandSparkles}];
 export function RemoteSetupWizard({title,onTitleChange,category,onCategoryChange,roomIcon,onRoomIconChange,mode,onModeChange,quota,onQuotaChange,error,busy,onBack,onCreate}:{title:string;onTitleChange:(value:string)=>void;category:RoomCategory;onCategoryChange:(value:RoomCategory)=>void;roomIcon:string;onRoomIconChange:(value:string)=>void;mode:"open"|"guest-quota";onModeChange:(value:"open"|"guest-quota")=>void;quota:number;onQuotaChange:(value:number)=>void;error:string;busy:boolean;onBack:()=>void;onCreate:()=>void}) {
