@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@wafflr/ui/styles.css";
+@import "./game-ui/game-ui.css";
 @import "./responsive.css";
 @import "./components/Modal.css";
 
