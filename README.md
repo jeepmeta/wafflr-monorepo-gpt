@@ -31,7 +31,7 @@ pnpm install
 pnpm dev
 ```
 
-The web app runs at http://localhost:5173.
+The web app runs at <http://localhost:5173>.
 
 See [development setup](./docs/development-setup.md) for environment guidance and checks.
 
