@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Check, Copy, RefreshCw, ShieldAlert } from "lucide-react";
 import { Butters, Button, Card, SectionHeading } from "@wafflr/ui";
-import { Modal } from "./components/Modal";
+import { Modal } from "../../components/Modal";
 
 type Tally = { card_id: string; yep_count: number };
 type TallyCard = { id: string; title: string };

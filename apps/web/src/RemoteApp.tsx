@@ -3,13 +3,13 @@ import { ArrowLeft, ArrowRight, Check, Copy, Pencil, Plus, RefreshCw, Sparkles, 
 import { Badge, Butters, Button, Card, SectionHeading, TextField } from "@wafflr/ui";
 import { createBackend, type RoomCategory, type RoomHistoryEntry, type RoomIdentity, type RoomSnapshot } from "./supabase";
 import { ConfirmDialog } from "./components/Modal";
-import { RemoteSetupWizard } from "./RemoteSetupWizard";
-import { QRScannerScreen, RoomIntroScreen, ShareRoomDialog, TalliesDialog, WaitingScreen } from "./CatalogScreens";
-import { HostFinalReview } from "./HostFinalReview";
+import { RemoteSetupWizard } from "./screens/setup/RemoteSetupWizard";
+import { QRScannerScreen, RoomIntroScreen, ShareRoomDialog, TalliesDialog, WaitingScreen } from "./screens/room/CatalogScreens";
+import { HostFinalReview } from "./screens/room/HostFinalReview";
 import { YourRoomsDialog } from "./YourRoomsDialog";
 import { BallotReviewDialog } from "./BallotReviewDialog";
-import { TieBreakIntroScreen } from "./TieBreakIntroScreen";
-import { ErrorRecoveryScreen } from "./CatalogScreens";
+import { TieBreakIntroScreen } from "./screens/results/TieBreakIntroScreen";
+import { ErrorRecoveryScreen } from "./screens/room/CatalogScreens";
 import "./CatalogScreens.css";
 
 const categories: { id: RoomCategory; title: string; subtitle: string; emoji: string }[] = [
