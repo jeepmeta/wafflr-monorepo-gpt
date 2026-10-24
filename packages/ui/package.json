@@ -8,6 +8,7 @@
   },
   "exports": {
     ".": "./src/index.tsx",
+    "./artwork": "./src/artwork.tsx",
     "./styles.css": "./src/styles.css"
   },
   "peerDependencies": {
