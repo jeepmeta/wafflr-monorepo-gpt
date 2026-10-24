@@ -15,6 +15,12 @@ export const wafflrAssets = {
       roomCodePlaque: "/assets/ui/header/room-code-plaque.webp",
       roomStatusBadge: "/assets/ui/header/room-status-badge.webp",
     },
+    social: {
+      x: "/assets/ui/social/x.webp",
+      youtube: "/assets/ui/social/youtube.webp",
+      instagram: "/assets/ui/social/instagram.webp",
+      discord: "/assets/ui/social/discord.webp",
+    },
     buttons: {
       round: {
         back: "/assets/ui/buttons/round/back.webp",
@@ -211,6 +217,10 @@ export const wafflrAssetManifest: readonly WafflrAssetManifestEntry[] = [
   { path: "ui/header/your-rooms-pill.webp", src: "/assets/ui/header/your-rooms-pill.webp", width: 640, height: 192, aspectRatio: "640 / 192", purpose: "Your Rooms control" },
   { path: "ui/header/room-code-plaque.webp", src: "/assets/ui/header/room-code-plaque.webp", width: 768, height: 256, aspectRatio: "768 / 256", purpose: "Live room code overlay" },
   { path: "ui/header/room-status-badge.webp", src: "/assets/ui/header/room-status-badge.webp", width: 512, height: 192, aspectRatio: "512 / 192", purpose: "Room status" },
+  { path: "ui/social/x.webp", src: "/assets/ui/social/x.webp", width: 256, height: 256, aspectRatio: "256 / 256", purpose: "X social link icon" },
+  { path: "ui/social/youtube.webp", src: "/assets/ui/social/youtube.webp", width: 256, height: 256, aspectRatio: "256 / 256", purpose: "YouTube social link icon" },
+  { path: "ui/social/instagram.webp", src: "/assets/ui/social/instagram.webp", width: 256, height: 256, aspectRatio: "256 / 256", purpose: "Instagram social link icon" },
+  { path: "ui/social/discord.webp", src: "/assets/ui/social/discord.webp", width: 256, height: 256, aspectRatio: "256 / 256", purpose: "Discord social link icon" },
   { path: "ui/buttons/round/back.webp", src: "/assets/ui/buttons/round/back.webp", width: 256, height: 256, aspectRatio: "256 / 256", purpose: "Back button" },
   { path: "ui/buttons/round/back-pressed.webp", src: "/assets/ui/buttons/round/back-pressed.webp", width: 256, height: 256, aspectRatio: "256 / 256", purpose: "Pressed back button" },
   { path: "ui/buttons/round/close.webp", src: "/assets/ui/buttons/round/close.webp", width: 256, height: 256, aspectRatio: "256 / 256", purpose: "Close button" },
