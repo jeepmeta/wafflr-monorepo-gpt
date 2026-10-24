@@ -31,6 +31,11 @@ Padding means transparent margin unless described as a content-safe area. Sprite
 | `ui/header/your-rooms-pill.webp` | 640 × 192 | 16 px; label/count safe area | Your Rooms control |
 | `ui/header/room-code-plaque.webp` | 768 × 256 | 20 px; center clear | Live room code overlay |
 | `ui/header/room-status-badge.webp` | 512 × 192 | 16 px; live label | Room status |
+| **Social icons** | | | |
+| `ui/social/x.webp` | 256 × 256 | 10–14 px | X social link icon |
+| `ui/social/youtube.webp` | 256 × 256 | 10–14 px | YouTube social link icon |
+| `ui/social/instagram.webp` | 256 × 256 | 10–14 px | Instagram social link icon |
+| `ui/social/discord.webp` | 256 × 256 | 10–14 px | Discord social link icon |
 | **Buttons and controls** | | | |
 | `ui/buttons/round/back.webp` | 256 × 256 | 10–14 px | Back button |
 | `ui/buttons/round/back-pressed.webp` | 256 × 256 | Match normal state | Pressed back button |
