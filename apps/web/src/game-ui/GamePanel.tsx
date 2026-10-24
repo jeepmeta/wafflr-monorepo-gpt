@@ -13,7 +13,7 @@ export type GamePanelProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & 
 
 /** Nine-slice panel: corners stay intact while the center stretches with live content. */
 export function GamePanel({
-  src, children, slice = 28, borderWidth = 24, className, contentClassName, style, ...props
+  src, children, slice = 28, borderWidth = "clamp(12px, 2.5vw, 24px)", className, contentClassName, style, ...props
 }: GamePanelProps) {
   const panelStyle: CSSProperties = {
     borderStyle: "solid",
