@@ -1,10 +1,40 @@
 # Wafflr asset registry and layout notes
 
-The canonical asset inventory is [public/assets/README.md](../../../public/assets/README.md). The typed registry in `src/assets/registry.ts` is generated from that inventory and exposes stable keys, public URLs, source dimensions, aspect ratios, and notes. Keep the README as the source of truth; regenerate or update the registry when filenames or dimensions change.
+The canonical asset inventory is [public/assets/README.md](../../public/assets/README.md). The typed registry in `src/assets/registry.ts` maps the 130 manifest entries to stable keys, public URLs, source dimensions, aspect ratios, and notes. Keep the public asset README as the source of truth; update the registry whenever filenames or dimensions change.
 
 ## Public path rule
 
 Vite serves files in `apps/web/public` from the root URL. An asset at `public/assets/ui/cards/card-frame.webp` is referenced as `/assets/ui/cards/card-frame.webp`, not imported as a module. The registry contains these URLs; the actual WebP files must still be exported into the matching folders.
+
+## Usage
+
+Import registry entries from the web app and image-backed primitives from the shared UI package:
+
+```tsx
+import { wafflrAssets } from "./assets/registry";
+import { ArtworkButton, ArtworkCard, CounterPill } from "@wafflr/ui/artwork";
+
+<ArtworkButton
+  src={wafflrAssets.buttonPrimary.src}
+  style={{ width: "100%", maxWidth: "18rem", aspectRatio: "3 / 1" }}
+  onClick={handleCreate}
+>
+  Create room
+</ArtworkButton>
+
+<CounterPill
+  src={wafflrAssets.yourRoomsPill.src}
+  label="Your Rooms"
+  value={roomCount}
+/>
+
+<ArtworkCard src={wafflrAssets.cardFrame.src}>
+  <h3>{card.title}</h3>
+  <p>{card.subtitle}</p>
+</ArtworkCard>
+```
+
+For image-backed buttons, give the element a width and either a minimum height or an aspect ratio so the decorative image has a real box to fill. For content-led panels and cards, live content can establish height naturally. Use the source dimensions when choosing an aspect ratio; the registry exposes each asset's `width`, `height`, and `aspectRatio`.
 
 ## Layout rules
 
@@ -24,4 +54,4 @@ Vite serves files in `apps/web/public` from the root URL. An asset at `public/as
 - `ArtworkPanel` / `ArtworkCard`: image-backed layout containers with responsive content padding.
 - `CounterPill`: reusable label/value pill with a live numeric value.
 
-Use the component that fits the behavior, not a new component for every file. Pass a registry entry's `.src` and its dimensions to the relevant component. Missing images during asset production will appear as missing until the WebP file is added; the registry intentionally does not fabricate placeholder artwork.
+Use the component that fits the behavior, not a new component for every file. Missing images during asset production will appear as missing until the WebP file is added; the registry intentionally does not fabricate placeholder artwork.
