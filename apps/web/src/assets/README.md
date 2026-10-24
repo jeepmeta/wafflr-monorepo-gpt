@@ -15,7 +15,7 @@ import { wafflrAssets } from "./assets/registry";
 import { ArtworkButton, ArtworkCard, CounterPill } from "@wafflr/ui/artwork";
 
 <ArtworkButton
-  src={wafflrAssets.buttonPrimary.src}
+  src={wafflrAssets.uiButtonsPrimaryButtonPrimary.src}
   style={{ width: "100%", maxWidth: "18rem", aspectRatio: "3 / 1" }}
   onClick={handleCreate}
 >
@@ -23,12 +23,12 @@ import { ArtworkButton, ArtworkCard, CounterPill } from "@wafflr/ui/artwork";
 </ArtworkButton>
 
 <CounterPill
-  src={wafflrAssets.yourRoomsPill.src}
+  src={wafflrAssets.uiHeaderYourRoomsPill.src}
   label="Your Rooms"
   value={roomCount}
 />
 
-<ArtworkCard src={wafflrAssets.cardFrame.src}>
+<ArtworkCard src={wafflrAssets.uiCardsCardFrame.src}>
   <h3>{card.title}</h3>
   <p>{card.subtitle}</p>
 </ArtworkCard>
