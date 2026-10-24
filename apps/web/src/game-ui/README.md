@@ -31,7 +31,7 @@ Use CSS Grid and Flexbox for page and card layouts. Set explicit aspect ratios f
 
 Responsive behavior is mobile-first. Let text wrap inside a defined content-safe area, use `min-width: 0` and `overflow-wrap: anywhere` where long content could overflow, and use `clamp()` for fluid sizes. At breakpoints, rearrange the surrounding layout rather than changing the proportions of the artwork. Test narrow phones, larger phones, tablets, and desktop widths.
 
-Avoid adding inline style rules for individual assets. Shared component styles belong in `game-ui.css`; screen-specific positioning belongs in the relevant screen stylesheet. Import `game-ui.css` once through `styles.css`.
+Avoid adding inline style rules for individual assets. All web-app styles live in `apps/web/src/styles.css`. Keep it as the single app-level stylesheet; do not add screen-specific CSS files. Prefer reusable artwork components for visual surfaces, and use the shared stylesheet for layout, responsive behavior, accessibility, and live text.
 
 ## Adding assets
 
