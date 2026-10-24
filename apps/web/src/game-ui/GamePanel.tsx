@@ -20,7 +20,7 @@ export function GamePanel({
     borderWidth,
     borderImageSource: `url("${assetSrc(src)}")`,
     borderImageSlice: slice,
-    borderImageWidth: borderWidth,
+    borderImageWidth: typeof borderWidth === "number" ? `${borderWidth}px` : borderWidth,
     borderImageRepeat: "stretch",
     minWidth: 0,
     ...style,
