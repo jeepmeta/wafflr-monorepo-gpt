@@ -12,6 +12,7 @@ The web app's artwork primitives live here. Import from `./game-ui` or the folde
 
 ## Components
 
+- `SocialIcon`: one reusable, accessible link for X, YouTube, Instagram, and Discord; supply the platform and destination URL.
 - `ImageButton`: accessible native button with normal, pressed, and disabled artwork variants.
 - `GamePanel`: nine-slice frame so panel corners stay intact as the content area grows.
 - `GameCard`: standard decision card; category icons and frame states come from the registry, while titles/descriptions stay live text.
