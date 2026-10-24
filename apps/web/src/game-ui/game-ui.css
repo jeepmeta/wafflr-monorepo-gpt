@@ -200,3 +200,29 @@
   .wf-game-card { transition: none; }
   .wf-game-card.is-selected { transform: none; }
 }
+
+
+/* Shared artwork-backed social links */
+.wf-social-icon {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  vertical-align: middle;
+  -webkit-tap-highlight-color: transparent;
+}
+.wf-social-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.wf-social-icon:focus-visible {
+  outline: 3px solid var(--wafflr-color-ink, #292044);
+  outline-offset: 3px;
+}
+.wf-social-icon:hover { transform: translateY(-1px); }
+@media (prefers-reduced-motion: reduce) {
+  .wf-social-icon:hover { transform: none; }
+}
