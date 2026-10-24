@@ -35,7 +35,6 @@ export function GameCard({
       {...props}
       src={frame}
       slice={28}
-      borderWidth={24}
       className={["wf-game-card", selected && "is-selected", disabled && "is-disabled", className].filter(Boolean).join(" ")}
     >
       <img className="wf-game-card__category" src={categoryIcons[category]} alt="" aria-hidden="true" draggable={false} />
