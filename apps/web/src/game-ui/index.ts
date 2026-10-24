@@ -8,3 +8,4 @@ export * from "./GameCard";
 export * from "./GamePanel";
 export * from "./ImageButton";
 export * from "./SpriteSheet";
+export { SocialIcon, type SocialIconProps, type SocialPlatform } from "./SocialIcon";
