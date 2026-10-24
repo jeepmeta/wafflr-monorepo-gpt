@@ -335,5 +335,5 @@ export const wafflrAssetManifest: readonly WafflrAssetManifestEntry[] = [
 
 /** Resolve a registry path for generic artwork components. */
 export function assetSrc(src: WafflrAssetPath): string {
-  return src.startsWith("/") ? src : `/assets/${src.replace(/^\\/+/, "")}`;
+  return src.startsWith("/") ? src : \`/assets/\${src.replace(/^\/+/, "")}\`;
 }
