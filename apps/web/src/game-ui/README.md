@@ -1,13 +1,37 @@
 # Artwork-first game UI
 
-Use the exported components in this folder to keep raster artwork separate from interaction and live content.
+The web app's artwork primitives live here. Import from `./game-ui` or the folder's `index.ts` barrel.
 
-- `ImageButton`: individual WebP button art with optional pressed/disabled variants. The native button remains the click/focus target.
-- `SpriteSheet`: a regular-grid sprite sheet, optionally advanced frame by frame. Supply exact `columns`, `rows`, `frameCount`, and `frameDurationMs` values for the art.
-- `game-ui.css`: shared baseline styles for these primitives.
+## Registry
 
-Import the stylesheet once from the web app's global stylesheet. Do not add inline CSS for individual assets. Add assets under `public/assets` and reference them by root-relative path, such as `/assets/ui/buttons/create-room.webp`.
+- `assets.ts` is the central registry for the full inventory in `apps/web/public/assets/README.md`.
+- Use `wafflrAssets.ui...` paths instead of typing asset paths directly in screen components.
+- `wafflrAssetManifest` records the planned path, source dimensions, aspect ratio, and intended use for every inventory item.
+- The inventory is a plan, not proof that a binary exists. Add the WebP file at the documented path before using it at runtime.
+- Vite serves files under `public/assets` from `/assets/...`; do not import public files as JavaScript modules.
 
-Keep changing information in React/HTML: room titles, room counts, text inputs, room lists, card names, vote tallies, and statuses. Put a transparent image frame behind or around these elements, then position live content in a separate layout layer. Fixed artwork labels can be baked into WebP; variable labels must remain live text.
+## Components
 
-Avoid scaling an asset non-uniformly. Preserve its aspect ratio and use intentional contain/cover behavior per asset. Responsive layouts may reposition and uniformly scale a composition, but should not reflow the artwork or wrap baked-in labels.
+- `ImageButton`: accessible native button with normal, pressed, and disabled artwork variants.
+- `GamePanel`: nine-slice frame so panel corners stay intact as the content area grows.
+- `GameCard`: standard decision card; category icons and frame states come from the registry, while titles/descriptions stay live text.
+- `CounterPill`: artwork-backed label and changing count.
+- `GameBadge`: artwork-backed short label.
+- `ArtworkFrame`: fixed-proportion image frame with a live React content layer.
+- `ArtworkInput`: real input field that can be styled over input artwork.
+- `AssetImage`: helper for registry-backed images.
+- `SpriteSheet`: frame-based sprite sheet animation.
+
+## Layout rules
+
+Keep artwork and content separate. Images provide the visual shell; HTML/React supplies changing text, numbers, form controls, and accessible names. Use the Wafflr display font and shared design tokens for live text, not images of individual letters.
+
+Use CSS Grid and Flexbox for page and card layouts. Set explicit aspect ratios for fixed artwork; use `object-fit: contain` for artwork that must remain whole. Use `cover` only for intentional full-bleed backgrounds. Use `GamePanel` or another nine-slice frame for panels that must grow with text; do not stretch a whole panel image and distort its corners.
+
+Responsive behavior is mobile-first. Let text wrap inside a defined content-safe area, use `min-width: 0` and `overflow-wrap: anywhere` where long content could overflow, and use `clamp()` for fluid sizes. At breakpoints, rearrange the surrounding layout rather than changing the proportions of the artwork. Test narrow phones, larger phones, tablets, and desktop widths.
+
+Avoid adding inline style rules for individual assets. Shared component styles belong in `game-ui.css`; screen-specific positioning belongs in the relevant screen stylesheet. Import `game-ui.css` once through `styles.css`.
+
+## Adding assets
+
+Add the file using the exact path and dimensions documented in `public/assets/README.md`. If the filename or purpose changes, update that README and `assets.ts` together. Keep changing content out of the image. Keep normal, pressed, selected, and disabled variants aligned on identical canvases.
