@@ -11,7 +11,7 @@ const categoryIcons = {
   custom: wafflrAssets.ui.cards.cardCategoryCustom,
 } as const;
 
-export type GameCardProps = Omit<HTMLAttributes<HTMLElement>, "children" | "title"> & {
+export type GameCardProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "title"> & {
   title: string;
   category: CardCategory;
   description?: string;
@@ -33,7 +33,6 @@ export function GameCard({
   return (
     <GamePanel
       {...props}
-      as={undefined}
       src={frame}
       slice={28}
       borderWidth={24}
